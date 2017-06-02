@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Robotic systems understand their environment through the use of a sensor suite. It is necessary to to fuse the output between sensors and across time points in a process called sensor fusion (also termed multi-sensor data fusion). Specifically, sensor fusion is the combining of data immediately from or data derived from sensors in order to produce enhanced data with the intent of reducing ambiguity and uncertainty, extending temporal and spatial coverage, and improving resolution of the robotic system. <sup>[1] [2]</sup>
+Robotic systems understand their environment through the use of a sensor suite. It is necessary to fuse the output between sensors and across time points in a process called sensor fusion (also termed multi-sensor data fusion). Specifically, sensor fusion is the combining of data immediately from or data derived from sensors in order to produce enhanced data with the intent of reducing ambiguity and uncertainty, extending temporal and spatial coverage, and improving resolution of the robotic system. <sup>[1] [2]</sup>
 
 Given the inherent noise of robotic sensors, uncertainty is ubiquitous in the sensing and fusion processes. Probabilistic models are thus employed to use the available information to its maximum effect. Almost all data fusion problems involve an estimation process, wherein a number of observations from multiple sensors are obtained to make inferences about the true state of the environment under observation.  
 
@@ -92,6 +92,30 @@ Descriptions of the data can be found in the documentation, including a good des
 The above data can be used to enhance the fidelity and accuracy of camera images.
 
 
+## Diagram
+
+![Sensor fusion for robot localization](img/sensor_fusion_diagram.png)
+
+An example of fusion for position estimation.  GPS, though inaccurate, is the most intuitive estimation of position.  Inertial measurement unit can be used across time points to measure as well.  Lasers and cameras have been shown to have the ability to estimate positon based on distinct landmarks.<sup>[13]</sup>
+
+
+## Terms
+
+ -  Sensor noise: a random variation in the characteristics of sensor data, including fluctuations in color, intensity, distance reading, etc...  For example, noise includes deviation in a camera image from the image in actuality.  A Kalman filter will help to predict the world despite sensor noise.
+
+ - Weight: a factor applied to a measurement given its trustworthiness.  A more trusted measurement is given a greater weight, which is calculated by covariance.
+
+ - Covariance: measure of variability between two statistical measurements, or the measure of which two variables move in the same direction.  Used to calculate
+
+ - Covariance matrix: a matrix in which the elements are used to measure the accuracy of a reading
+
+ - Predict phase: the portion of the Kalman filter where an estimate from a previous timestamp is used to predict a measurement from the next timestamp
+
+ - Update phase: the current observation is combined with the prediction to update the robot's estimate of its state. It is the second phase of the Kalman filter.
+
+ - Linearity: the proportionality of input to output.  Extended and unscented Kalman filters make no assumptions about linearity, unlike traditional Kalman filters which assume linear readings.
+
+
 ## Reference
 
 <sup>[1]</sup> A ['gentle' introduction](https://www.researchgate.net/profile/Wilfried_Elmenreich/publication/267771481_An_Introduction_to_Sensor_Fusion/links/55d2e45908ae0a3417222dd9.pdf) to sensor fusion
@@ -122,3 +146,5 @@ and [unscented Kalman filter](https://www.seas.harvard.edu/courses/cs281/papers/
 <sup>[11]</sup> [Raw compressed image documentation](http://docs.ros.org/api/sensor_msgs/html/msg/Image.html)
 
 <sup>[12]</sup> [Camera information](http://docs.ros.org/api/sensor_msgs/html/msg/CameraInfo.html)
+
+<sup>[13]</sup> [Using lasers and cameras to estimate position](http://robots.stanford.edu/papers/fox.aaai99.pdf)
