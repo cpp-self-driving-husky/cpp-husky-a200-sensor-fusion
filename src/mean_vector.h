@@ -1,46 +1,37 @@
 #ifndef MEAN_VECTOR_H_
 #define MEAN_VECTOR_H_
 
+namespace cov {
+	class CovarianceMatrix;
+}
+
 
 namespace vec {
 
 	struct MeanVector {
 
-		MeanVector() {
+		MeanVector(int size);
+		MeanVector(double* elements, int size);
+		~MeanVector();
 
-		}
+		void init(int size);
+		void clear();
+		
+		// assumes row major order
+		void calculate_mean_vector(
+			double* elements,
+			int rows, int cols);
+		//cov::CovarianceMatrix create_covariance_matrix();
 
-		MeanVector(double* data, int rows, int cols) {
-			this->calculateFromData(data,rows,cols);
-		}
+		double operator[](int i);
 
-		~MeanVector() {
-			if (this->elements_ != nullptr) {
-				delete[] this->elements_;
-				this->elements_ = nullptr;
-			}
-		}
 
-		double* initDoublePtr(int cols) {
-			double* ptr = new double[size];
-			for (int i = 0; i < size; ++i)
-				ptr[i] = 0.0;
-			return ptr;
-		}
+		// temporary debugging fxn
+		void print_mean_vector();
 
-		void calculateFromData(double* data, int rows, int cols) {
-			this->elements_ = this->initDoublePtr(cols);
-			for (int c = 0; c < cols; ++c) {
-				for (int r = 0; r < rows; ++r) {
-					this->elements_[c] += data[cols*r + c];
-				}
-				this->elements_[c] /= rows;
-			}
-		}
-
-		MeanVector operator+(MeanVector& rh);
 
 		double* elements_;
+		int size_;
 
 	};
 
@@ -48,3 +39,4 @@ namespace vec {
 
 
 #endif // !MEAN_VECTOR_H_
+
