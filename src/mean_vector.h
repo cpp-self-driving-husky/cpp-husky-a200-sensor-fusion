@@ -1,42 +1,34 @@
 #ifndef MEAN_VECTOR_H_
 #define MEAN_VECTOR_H_
 
-namespace cov {
-	class CovarianceMatrix;
+
+namespace data {
+    class DataMatrix;
 }
 
 
 namespace vec {
 
-	struct MeanVector {
+    class MeanVector {
 
-		MeanVector(int size);
-		MeanVector(double* elements, int size);
-		~MeanVector();
+        public:
+            MeanVector();
+            ~MeanVector();
 
-		void init(int size);
-		void clear();
-		
-		// assumes row major order
-		void calculate_mean_vector(
-			double* elements,
-			int rows, int cols);
-		//cov::CovarianceMatrix create_covariance_matrix();
+            double operator[](int i);
+            void calculate(data::DataMatrix& data_matrix);
 
-		double operator[](int i);
+            int getVars();
 
 
-		// temporary debugging fxn
-		void print_mean_vector();
+        private:
+            double* vec_;
+            int vars_;
 
-
-		double* elements_;
-		int size_;
-
-	};
+    };
 
 }
 
 
-#endif // !MEAN_VECTOR_H_
+#endif // MEAN_VECTOR_H_
 

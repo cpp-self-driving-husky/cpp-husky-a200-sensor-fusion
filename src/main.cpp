@@ -1,5 +1,5 @@
 #include <iostream>
-#include "covariance_matrix.h"
+//#include "covariance_matrix.h"
 #include "../test/test.h"
 
 
@@ -9,7 +9,9 @@ int main(int argc, char* argv[]) {
 	//test.testCovarianceMatrix();
 
 	test::Test test;
-	test.testObservationsA();
+	//data::DataMatrix matrix = test.testDataMatrixA(false);
+	//test.testMeanVectorA(matrix);
+	test.testMeanVectorA();
 
 	return 0;
 }
