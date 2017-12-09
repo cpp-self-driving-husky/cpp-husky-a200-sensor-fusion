@@ -2,20 +2,15 @@
 #define DATA_MATRIX_H_
 
 
-namespace obs {
+namespace data {
 
-    class Observation {
+    class DataMatrix {
 
         public:
-            Observation();
-            ~Observation();
+            DataMatrix();
+            ~DataMatrix();
 
-            // TODO make this private
-            void create();
-            // TOOD make this private
-
-            void create(double* data, int meas, int vars);
-            void clear();
+            void init(double* data, int meas, int vars);
 
             double operator[](int i);
 
@@ -23,18 +18,15 @@ namespace obs {
             void removeData(int meas);
 
 
-            // TODO remove these getter functions!
+            // TODO remove this getter function...
             //      for debugging only!
             double* getData() {
                 return this->data_;
             }
-            int getMeas() {
-                return this->meas_;
-            }
-            int getVars() {
-                return this->vars_;
-            }
-            // TODO remove these getter functions!
+
+
+            int getMeas();
+            int getVars();
 
 
         private:
