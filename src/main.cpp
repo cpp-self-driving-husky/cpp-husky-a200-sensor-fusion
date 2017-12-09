@@ -5,13 +5,8 @@
 
 int main(int argc, char* argv[]) {
 
-	//test::Test test;
-	//test.testCovarianceMatrix();
-
 	test::Test test;
-	//data::DataMatrix matrix = test.testDataMatrixA(false);
-	//test.testMeanVectorA(matrix);
-	test.testMeanVectorA();
+	test.testCovarianceMatrix();
 
 	return 0;
 }

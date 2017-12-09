@@ -15,6 +15,8 @@ namespace vec {
             MeanVector();
             ~MeanVector();
 
+            void init(int vars);
+
             double operator[](int i);
             void calculate(data::DataMatrix& data_matrix);
 

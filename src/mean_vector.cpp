@@ -15,20 +15,24 @@ vec::MeanVector::~MeanVector() {
 }
 
 
+void vec::MeanVector::init(int vars) {
+    if (this->vec_ != nullptr)
+        delete[] this->vec_;
+    this->vars_ = vars;
+    this->vec_ = new double[this->vars_];
+    for (int i = 0; i < this->vars_; ++i)
+        this->vec_[i] = 0.0;
+}
+
+
 double vec::MeanVector::operator[](int i) {
     return this->vec_[i];
 }
 
 
+// TODO perhaps check if this->vars_ == data_matrix.getVars
 void vec::MeanVector::calculate(data::DataMatrix& data_matrix) {
-
-    this->vars_ = data_matrix.getVars();
     int meas = data_matrix.getMeas();
-    if (this->vec_ != nullptr) {
-        delete[] this->vec_;
-        this->vec_ = nullptr;
-    }
-    this->vec_ = new double[this->vars_];
     for (int v = 0; v < this->vars_; ++v) {
         this->vec_[v] = 0.0;
         for (int m = 0; m < meas; ++m) {
@@ -36,7 +40,6 @@ void vec::MeanVector::calculate(data::DataMatrix& data_matrix) {
         }
         this->vec_[v] /= meas;
     }
-
 }
 
 
