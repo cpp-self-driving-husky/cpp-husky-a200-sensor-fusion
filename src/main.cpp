@@ -5,8 +5,11 @@
 
 int main(int argc, char* argv[]) {
 
+	//test::Test test;
+	//test.testCovarianceMatrix();
+
 	test::Test test;
-	test.testCovarianceMatrix();
+	test.testObservationsA();
 
 	return 0;
 }

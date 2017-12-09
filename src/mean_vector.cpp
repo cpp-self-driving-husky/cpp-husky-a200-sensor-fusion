@@ -52,10 +52,6 @@ void vec::MeanVector::calculate_mean_vector(double* elements, int rows, int cols
 }
 
 
-//cov::CovarianceMatrix vec::MeanVector::create_covariance_matrix() {
-
-//}
-
 
 
 double vec::MeanVector::operator[](int i) {
@@ -70,41 +66,5 @@ void vec::MeanVector::print_mean_vector() {
 }
 
 
-
-
-/*
-
-#include "mean_vector.h"
-
-
-vec::MeanVector::MeanVector(int size) :
-	size_(size)
-{
-	elements_ = new double[size];
-	for (int i = 0; i < size; ++i)
-		elements_[i] = 0.0;
-}
-
-
-vec::MeanVector::~MeanVector() {
-	if (elements_ != nullptr) {
-		delete[] elements_;
-		elements_ = nullptr;
-	}
-}
-
-
-void vec::MeanVector::calculate_vector(
-	double** random_variables, int samples) 
-{
-	for (int c = 0; c < size_; ++c) {
-		for (int r = 0; r < samples; ++r) {
-			elements_[c] += random_variables[r][c];
-		}
-		elements_[c] /= samples;
-	}
-}
-
-*/
 
 

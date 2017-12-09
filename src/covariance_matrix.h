@@ -1,3 +1,40 @@
+#ifndef COVARIANCE_MATRIX_H_
+#define COVARIANCE_MATRIX_H_
+
+
+namespace cov {
+
+    class CovarianceMatrix {
+
+
+        public:
+            CovarianceMatrix();
+            ~CovarianceMatrix();
+
+
+
+
+
+        private:
+            double* matrix_;
+            int rows_;
+            int cols_;
+
+
+    };
+
+
+}
+
+#endif // COVARIANCE_MATRIX_H_
+
+
+
+
+
+
+/*
+
 #ifndef COVARIANCE_H_
 #define COVARIANCE_H_
 
@@ -29,7 +66,7 @@ namespace cov {
 		double sampleCovariance(
 			double* x_s, double* y_s,
 			int sample_size);
-		
+
 		//void calculateCovarianceMatrix(vec::MeanVector& mean_vector);
 
 		double* calculateCovarianceMatrix(double* data, int rows, int cols);
@@ -48,3 +85,5 @@ namespace cov {
 
 
 #endif // !COVARIANCE_H_
+
+*/

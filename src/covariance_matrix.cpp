@@ -1,5 +1,33 @@
 #include <iostream>
 #include "covariance_matrix.h"
+
+
+cov::CovarianceMatrix::CovarianceMatrix() :
+    matrix_(nullptr)
+ {}
+
+
+cov::CovarianceMatrix::~CovarianceMatrix() {
+    if (matrix_ != nullptr) {
+        delete[] matrix_;
+        matrix_ = nullptr;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+#include <iostream>
+#include "covariance_matrix.h"
 #include "mean_vector.h"
 
 
@@ -9,7 +37,7 @@ cov::CovarianceMatrix::CovarianceMatrix() {
 
 
 cov::CovarianceMatrix::CovarianceMatrix(int size) :
-	//rows_(size), cols_(size), 
+	//rows_(size), cols_(size),
 	vector_size_(size)
 {
 	vector_ = new double[size];
@@ -81,14 +109,14 @@ double cov::CovarianceMatrix::sampleCovariance(
 	double* x_s, double* y_s,
 	int sample_size)
 {
-	double x_mean = this->calculateMean(x_s, sample_size), 
+	double x_mean = this->calculateMean(x_s, sample_size),
 		y_mean = this->calculateMean(y_s, sample_size);
-	
+
 	double covariance = 0.0;
 	for (int i = 0; i < sample_size; ++i)
 		covariance += (x_s[i] - x_mean)*(y_s[i] - y_mean);
 	covariance /= sample_size-1;
-	
+
 	return covariance;
 }
 
@@ -116,16 +144,16 @@ double* cov::CovarianceMatrix::calculateCovarianceMatrix(double* data, int rows,
 	double* covariance_matrix = this->initDoublePtr(cols*cols);
 	for (int c_a = 0; c_a < cols; ++c_a) {
 		for (int c_b = 0; c_b < cols; ++c_b) {
-			double mean_a = mean_vector[c_a], 
-				mean_b = mean_vector[c_b], 
+			double mean_a = mean_vector[c_a],
+				mean_b = mean_vector[c_b],
 				covariance = 0.0;
 			for (int r = 0; r < rows; ++r)
 				covariance += (data[cols*r+c_a]-mean_a)*(data[cols*r+c_b]-mean_b);
 			covariance /= rows-1;
-			covariance_matrix[c_a*cols+c_b] = covariance_matrix[c_b*cols+c_a] = covariance;			
+			covariance_matrix[c_a*cols+c_b] = covariance_matrix[c_b*cols+c_a] = covariance;
 		}
 	}
 	return covariance_matrix;
 }
 
-
+*/
