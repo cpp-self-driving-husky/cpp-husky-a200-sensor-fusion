@@ -7,8 +7,11 @@ int main(int argc, char* argv[]) {
 
 	test::Test test;
 	//test.testCovarianceMatrix();
+	//test.testMeanVectorA();
 
-	test.testMeanVectorA();
+
+	test.testMotionModelA();
+
 
 	return 0;
 }

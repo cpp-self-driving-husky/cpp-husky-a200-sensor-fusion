@@ -28,6 +28,7 @@ namespace state {
 
     typedef StateVector ControlVector;
     typedef StateVector MeasurementVector;
+    typedef StateVector ParameterVector;
 
 
     class MeanVector : public StateVector {
@@ -44,9 +45,6 @@ namespace state {
     };
 
 }
-
-
-
 
 
 #endif // STATE_VECTOR_H_
