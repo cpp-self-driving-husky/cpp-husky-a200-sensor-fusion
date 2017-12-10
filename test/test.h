@@ -2,7 +2,9 @@
 #define TEST_H_
 #include <string>
 #include "../src/data_matrix.h"
-#include "../src/mean_vector.h"
+//#include "../src/mean_vector.h"
+//#include "../src/covariance_matrix.h"
+#include "../src/state_vector.h"
 
 
 namespace test {
@@ -15,6 +17,10 @@ namespace test {
             //vec::MeanVector testMeanVectorA();
 
             void testMeanVectorA();
+            void testMeanVectorB(int seed);
+
+            //void testCovarianceMatrix();
+
 
         private:
             void print_matrix(
@@ -26,7 +32,11 @@ namespace test {
 
             void print_vector(
                 std::string& message,
-                vec::MeanVector& vec);
+                state::MeanVector& vec);
+
+            //void print_matrix(
+            //    std::string& message,
+            //    cov::CovarianceMatrix& covariance);
 
     };
 
@@ -36,40 +46,3 @@ namespace test {
 #endif // TEST_H_
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-#pragma once
-
-
-namespace test {
-
-	class Test {
-
-	public:
-		void testCovarianceMatrix();
-
-
-	private:
-
-
-	};
-
-}
-
-*/

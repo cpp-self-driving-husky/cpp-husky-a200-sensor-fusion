@@ -1,5 +1,7 @@
 #include <iostream>
 #include <typeinfo>
+#include <cstdlib>
+#include <ctime>
 #include "test.h"
 
 
@@ -10,13 +12,13 @@ void test::Test::print_matrix(
     std::cout << "\n" << message << "\n";
     for (int r = 0; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
-            std::cout << matrix[r*cols+c] << " ";
+            std::cout << matrix[r*cols+c] << "   ";
         }
         std::cout << "\n";
     }
     std::cout <<
-        "rows: " << rows << ", " <<
-        "cols: " << cols << "\n";
+        "measurements: " << rows << ", " <<
+        "vectors: " << cols << "\n";
     std::cout << std::endl;
 }
 
@@ -35,17 +37,40 @@ void test::Test::print_matrix(
 
 void test::Test::print_vector(
     std::string& message,
-    vec::MeanVector& vec)
+    state::MeanVector& vec)
 {
     std::cout << "\n" << message << "\n";
     int vars = vec.getVars();
     for (int i = 0; i < vars; ++i) {
-        std::cout << vec[i] << " ";
+        std::cout << vec[i] << "   ";
     }
     std::cout << "\n";
     std::cout << "variables " << vars << "\n";
     std::cout << "\n" << std::endl;
 }
+
+
+/*
+
+void test::Test::print_matrix(
+    std::string& message,
+    cov::CovarianceMatrix& covariance)
+{
+    std::cout << "\n" << message << "\n";
+    int vars = covariance.getVars();
+    for (int i = 0; i < vars; ++i) {
+        for (int j = 0; j < vars; ++j) {
+            std::cout << covariance[i*vars+j] << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n" <<
+        "Variables: " << vars <<
+        "\n" << std::endl;
+}
+
+*/
+
 
 
 void test::Test::testMeanVectorA() {
@@ -59,6 +84,7 @@ void test::Test::testMeanVectorA() {
     data_matrix.init(samples,meas,vars);
     delete[] samples;
 
+
     std::string msg_data = "Test Data Matrix A";
     this->print_matrix(
         msg_data,data_matrix.getData(),
@@ -67,20 +93,23 @@ void test::Test::testMeanVectorA() {
 
 
     std::string msg_mean = "Test Mean Vector A";
-    vec::MeanVector mean_vector;
+    state::MeanVector mean_vector;
+    mean_vector.init(vars);
     mean_vector.calculate(data_matrix);
     this->print_vector(msg_mean,mean_vector);
+
 
     msg_data = "Test Data Matrix B";
     meas = 4;
     samples = new double[vars*meas];
     for (int i = 0; i < meas*vars; ++i)
         samples[i] = 100+i;
+
+
     data_matrix.addData(samples,meas);
     delete[] samples;
-    this->print_matrix(
-        msg_data,data_matrix.getData(),
-        data_matrix.getMeas(),data_matrix.getVars());
+    this->print_matrix(msg_data,data_matrix);
+
 
     msg_mean = "Test Mean Vector B";
     mean_vector.calculate(data_matrix);
@@ -91,11 +120,108 @@ void test::Test::testMeanVectorA() {
     data_matrix.removeData(3);
     this->print_matrix(msg_data,data_matrix);
 
+
     msg_mean = "Test Mean Vector C";
     mean_vector.calculate(data_matrix);
     this->print_vector(msg_mean,mean_vector);
 
 }
+
+
+
+void test::Test::testMeanVectorB(int seed) {
+
+    srand(seed);
+    //std::cout << rand() << std::endl;
+
+    int meas = 10, vars = 5;
+    double* samples = new double[meas*vars];
+    for (int i = 0; i < meas*vars; ++i)
+        samples[i] = ((rand() % 1000000) / 10000.0 );
+
+    data::DataMatrix data;
+    data.init(samples,meas,vars);
+    delete[] samples;
+
+    std::string msg_data = "Test Data Matrix A";
+    this->print_matrix(msg_data,data);
+
+    std::string msg_vec = "Test Means Vector A";
+    state::MeanVector vec;
+    vec.init(vars);
+    vec.calculate(data);
+    this->print_vector(msg_vec,vec);
+
+}
+
+/*
+
+void test::Test::testCovarianceMatrix() {
+
+    int meas = 5, vars = 3;
+    double* samples = new double[meas*vars];
+    samples[0] = 4.0;
+    samples[1] = 2.0;
+    samples[2] = 0.6;
+    samples[3] = 4.2;
+    samples[4] = 2.1;
+    samples[5] = 0.59;
+    samples[6] = 3.9;
+    samples[7] = 2.0;
+    samples[8] = 0.58;
+    samples[9] = 4.3;
+    samples[10] = 2.1;
+    samples[11] = 0.62;
+    samples[12] = 4.1;
+    samples[13] = 2.2;
+    samples[14] = 0.63;
+
+    data::DataMatrix data_matrix;
+    data_matrix.init(samples,meas,vars);
+    delete[] samples;
+
+    std::string msg_data = "Test Data Matrix";
+    this->print_matrix(msg_data,data_matrix);
+
+    std::string msg_vec = "Test Mean Vector";
+    state::MeanVector mean_vector;
+    mean_vector.init(vars);
+    mean_vector.calculate(data_matrix);
+    this->print_vector(msg_vec,mean_vector);
+
+    std::string msg_cov = "Test Covariance Matrix";
+    cov::CovarianceMatrix covariance;
+    covariance.init(vars);
+    covariance.calculate(data_matrix,mean_vector);
+    this->print_matrix(msg_cov,covariance);
+
+
+}
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

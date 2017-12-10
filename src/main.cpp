@@ -6,7 +6,9 @@
 int main(int argc, char* argv[]) {
 
 	test::Test test;
-	test.testCovarianceMatrix();
+	//test.testCovarianceMatrix();
+
+	test.testMeanVectorA();
 
 	return 0;
 }
