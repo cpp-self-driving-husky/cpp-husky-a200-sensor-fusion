@@ -5,6 +5,7 @@
 //#include "../src/mean_vector.h"
 //#include "../src/covariance_matrix.h"
 #include "../src/state_vector.h"
+#include "../src/motion_model.h"
 
 
 namespace test {
@@ -20,6 +21,8 @@ namespace test {
             void testMeanVectorB(int seed);
 
             //void testCovarianceMatrix();
+
+            void testMotionModelA();
 
 
         private:
@@ -37,6 +40,10 @@ namespace test {
             //void print_matrix(
             //    std::string& message,
             //    cov::CovarianceMatrix& covariance);
+
+            void print_vector(
+                std::string& msg,
+                state::StateVector& xt);
 
     };
 

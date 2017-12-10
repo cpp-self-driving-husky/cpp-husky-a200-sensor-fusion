@@ -50,6 +50,20 @@ void test::Test::print_vector(
 }
 
 
+void test::Test::print_vector(
+    std::string& msg,
+    state::StateVector& xt)
+{
+    std::cout << "\n" << msg << "\n";
+    int vars = xt.getVars();
+    for (int i = 0; i < vars; ++i)
+        std::cout << xt[i] << " ";
+    std::cout << "\n" <<
+        "variables " << vars << "\n\n";
+
+}
+
+
 /*
 
 void test::Test::print_matrix(
@@ -204,7 +218,44 @@ void test::Test::testCovarianceMatrix() {
 
 
 
+void test::Test::testMotionModelA() {
 
+    srand(2);
+
+    int vars = 3;
+    state::StateVector xt_f;
+    state::StateVector xt_i;
+    state::StateVector ut_f;
+    state::StateVector ut_i;
+    xt_f.init(vars);
+    xt_i.init(vars);
+    ut_f.init(vars);
+    ut_i.init(vars);
+
+    for (int i = 0; i < vars; ++i) {
+        xt_f[i] = rand()/1000000000.0;
+        xt_i[i] = rand()/1000000000.0;
+        ut_f[i] = rand()/1000000000.0;
+        ut_i[i] = rand()/1000000000.0;
+    }
+
+    std::string msgx = "Test Vector X";
+    this->print_vector(msgx,xt_f);
+    this->print_vector(msgx,xt_i);
+
+    std::string msgu = "Test Vector U";
+    this->print_vector(msgu,ut_f);
+    this->print_vector(msgu,ut_i);
+
+
+    model::OdometryMotionModel odometry;
+    double res = odometry.calculate(xt_f,xt_i,ut_f,ut_i);
+
+    std::cout << "\n" <<
+        "Odometry: p(xt|ut,xt-1) = " << res << "\n" << std::endl;
+
+
+}
 
 
 
