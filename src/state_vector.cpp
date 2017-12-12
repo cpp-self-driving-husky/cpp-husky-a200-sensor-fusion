@@ -47,19 +47,8 @@ int state::StateVector::getVars() {
 }
 
 
-state::MeanVector::MeanVector() :
-    StateVector()
-{}
-
-
-state::MeanVector::~MeanVector() {
-    // empty dtor
-}
-
-
-
 // TODO perhaps check if this->vars_ == data_matrix.getVars
-void state::MeanVector::calculate(data::DataMatrix& data_matrix) {
+void state::StateVector::mean(data::DataMatrix& data_matrix) {
     int meas = data_matrix.getMeas();
     for (int v = 0; v < this->vars_; ++v) {
         this->vec_[v] = 0.0;
@@ -72,6 +61,19 @@ void state::MeanVector::calculate(data::DataMatrix& data_matrix) {
 
 
 
+
+/*
+
+state::MeanVector::MeanVector() :
+    StateVector()
+{}
+
+
+state::MeanVector::~MeanVector() {
+    // empty dtor
+}
+
+*/
 
 
 

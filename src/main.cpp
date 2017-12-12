@@ -6,12 +6,7 @@
 int main(int argc, char* argv[]) {
 
 	test::Test test;
-	//test.testCovarianceMatrix();
-	//test.testMeanVectorA();
-
-
-	test.testMotionModelA();
-
+	test.testMatrixA();
 
 	return 0;
 }

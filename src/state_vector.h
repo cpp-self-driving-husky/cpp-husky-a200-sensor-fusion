@@ -17,6 +17,7 @@ namespace state {
 
             void init(int vars);
             void init(double* vec, int vars);
+            void mean(data::DataMatrix& data_matrix);
             double& operator[](int i);
             int getVars();
 
@@ -31,6 +32,7 @@ namespace state {
     typedef StateVector ParameterVector;
 
 
+    /*
     class MeanVector : public StateVector {
 
         public:
@@ -43,6 +45,7 @@ namespace state {
 
 
     };
+    */
 
 }
 
