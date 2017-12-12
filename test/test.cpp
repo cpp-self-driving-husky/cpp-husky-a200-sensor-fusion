@@ -6,7 +6,7 @@
 
 
 void test::Test::print_matrix(
-    std::string& message, double* matrix,
+    std::string message, double* matrix,
     int rows, int cols)
 {
     std::cout << "\n" << message << "\n";
@@ -24,7 +24,7 @@ void test::Test::print_matrix(
 
 
 void test::Test::print_matrix(
-    std::string& message,
+    std::string message,
     data::DataMatrix& matrix)
 {
     this->print_matrix(
@@ -35,9 +35,10 @@ void test::Test::print_matrix(
 }
 
 
+/*
 void test::Test::print_vector(
-    std::string& message,
-    state::MeanVector& vec)
+    std::string message,
+    vec::MeanVector& vec)
 {
     std::cout << "\n" << message << "\n";
     int vars = vec.getVars();
@@ -48,10 +49,11 @@ void test::Test::print_vector(
     std::cout << "variables " << vars << "\n";
     std::cout << "\n" << std::endl;
 }
+*/
 
 
 void test::Test::print_vector(
-    std::string& msg,
+    std::string msg,
     state::StateVector& xt)
 {
     std::cout << "\n" << msg << "\n";
@@ -64,28 +66,115 @@ void test::Test::print_vector(
 }
 
 
-/*
-
-void test::Test::print_matrix(
-    std::string& message,
-    cov::CovarianceMatrix& covariance)
-{
-    std::cout << "\n" << message << "\n";
-    int vars = covariance.getVars();
-    for (int i = 0; i < vars; ++i) {
-        for (int j = 0; j < vars; ++j) {
-            std::cout << covariance[i*vars+j] << " ";
+void test::Test::print_matrix(std::string msg, mtx::Matrix& matrix) {
+    std::cout << msg << "\n";
+    for (int r = 0; r < matrix.getRows(); ++r) {
+        for (int c = 0; c < matrix.getCols(); ++c) {
+            std::cout << matrix[r*matrix.getCols()+c] << " ";
         }
         std::cout << "\n";
     }
-    std::cout << "\n" <<
-        "Variables: " << vars <<
-        "\n" << std::endl;
+    std::cout << std::endl;
 }
 
-*/
+
+void test::Test::testMatrixA() {
+
+    std::cout << "\n" << "Matrix Function Tests" << "\n\n";
+
+    int rows = 3, cols = 3;
+    mtx::Matrix matrix;
+    matrix.init(rows,cols);
+
+    for (int i = 0; i < matrix.getRows()*matrix.getCols(); ++i)
+        matrix[i] = i;
+    double elem = matrix.elem(1,2);
+
+    int vars = rows;
+    state::StateVector state;
+    state.init(vars);
+    for (int i = 0; i < vars; ++i)
+        state[i] = 100+i;
+
+    this->print_matrix("Matrix Test A",matrix);
+
+    this->print_vector("Vector Test A",state);
+    matrix.stateCol(state,1);
+    this->print_vector("Vector Test B",state);
+    matrix.stateRow(state,1);
+    this->print_vector("Vector Test C",state);
+
+    double* sample = new double[rows*cols];
+
+    sample[0] = 2;
+    sample[1] = 3;
+    sample[2] = 4;
+    sample[3] = 0;
+    sample[4] = 4;
+    sample[5] = 3;
+    sample[6] = -9;
+    sample[7] = 1;
+    sample[8] = -5;
+
+    data::DataMatrix data_matrix;
+    data_matrix.init(sample,rows,cols);
+    delete[] sample;
+    this->print_matrix("Print Data Matrix",data_matrix);
+
+    mtx::Matrix covariance_matrix;
+    covariance_matrix.init(rows,cols);
+    for (int i = 0; i < rows*cols; ++i)
+        covariance_matrix[i] = i;
+    this->print_matrix(
+        "Print Covariance Pre Calculation",
+        covariance_matrix);
+
+    state::StateVector mean_vector;
+    mean_vector.init(rows);
+    mean_vector.mean(data_matrix);
+    this->print_vector("Print Mean Vector",mean_vector);
+
+    mtx::MatrixCalculator calculator;
+    calculator.covariance(
+        covariance_matrix,
+        mean_vector,
+        data_matrix);
+
+    this->print_matrix(
+        "Print Covariance After Calculation",
+        covariance_matrix);
+
+    covariance_matrix[0] = 25;
+    covariance_matrix[1] = 15;
+    covariance_matrix[2] = -5;
+    covariance_matrix[3] = 15;
+    covariance_matrix[4] = 18;
+    covariance_matrix[5] = 0;
+    covariance_matrix[6] = -5;
+    covariance_matrix[7] = 0;
+    covariance_matrix[8] = 11;
+
+    mtx::Matrix cholesky_matrix;
+    cholesky_matrix.init(rows,cols);
+    cholesky_matrix[0] = 18;
+    cholesky_matrix[1] = 22;
+    cholesky_matrix[2] = 54;
+    cholesky_matrix[3] = 22;
+    cholesky_matrix[4] = 70;
+    cholesky_matrix[5] = 86;
+    cholesky_matrix[6] = 54;
+    cholesky_matrix[7] = 86;
+    cholesky_matrix[8] = 174;
+
+    calculator.cholesky(cholesky_matrix,covariance_matrix);
+    this->print_matrix(
+        "Print Cholesky Matrix",
+        cholesky_matrix);
+
+}
 
 
+/*
 
 void test::Test::testMeanVectorA() {
 
@@ -141,7 +230,9 @@ void test::Test::testMeanVectorA() {
 
 }
 
+*/
 
+/*
 
 void test::Test::testMeanVectorB(int seed) {
 
@@ -167,6 +258,74 @@ void test::Test::testMeanVectorB(int seed) {
     this->print_vector(msg_vec,vec);
 
 }
+
+*/
+
+void test::Test::testMotionModelA() {
+
+    srand(2);
+
+    int vars = 3;
+    state::StateVector xt_f;
+    state::StateVector xt_i;
+    state::StateVector ut_f;
+    state::StateVector ut_i;
+    xt_f.init(vars);
+    xt_i.init(vars);
+    ut_f.init(vars);
+    ut_i.init(vars);
+
+    for (int i = 0; i < vars; ++i) {
+        xt_f[i] = rand()/1000000000.0;
+        xt_i[i] = rand()/1000000000.0;
+        ut_f[i] = rand()/1000000000.0;
+        ut_i[i] = rand()/1000000000.0;
+    }
+
+    std::string msgx = "Test Vector X";
+    this->print_vector(msgx,xt_f);
+    this->print_vector(msgx,xt_i);
+
+    std::string msgu = "Test Vector U";
+    this->print_vector(msgu,ut_f);
+    this->print_vector(msgu,ut_i);
+
+
+    model::OdometryMotionModel odometry;
+    double res = odometry.calculate(xt_f,xt_i,ut_f,ut_i);
+
+    std::cout << "\n" <<
+        "Odometry: p(xt|ut,xt-1) = " << res << "\n" << std::endl;
+
+
+}
+
+
+
+
+
+/*
+
+void test::Test::print_matrix(
+    std::string& message,
+    cov::CovarianceMatrix& covariance)
+{
+    std::cout << "\n" << message << "\n";
+    int vars = covariance.getVars();
+    for (int i = 0; i < vars; ++i) {
+        for (int j = 0; j < vars; ++j) {
+            std::cout << covariance[i*vars+j] << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n" <<
+        "Variables: " << vars <<
+        "\n" << std::endl;
+}
+
+*/
+
+
 
 /*
 
@@ -213,68 +372,6 @@ void test::Test::testCovarianceMatrix() {
 }
 
 */
-
-
-
-
-
-void test::Test::testMotionModelA() {
-
-    srand(2);
-
-    int vars = 3;
-    state::StateVector xt_f;
-    state::StateVector xt_i;
-    state::StateVector ut_f;
-    state::StateVector ut_i;
-    xt_f.init(vars);
-    xt_i.init(vars);
-    ut_f.init(vars);
-    ut_i.init(vars);
-
-    for (int i = 0; i < vars; ++i) {
-        xt_f[i] = rand()/1000000000.0;
-        xt_i[i] = rand()/1000000000.0;
-        ut_f[i] = rand()/1000000000.0;
-        ut_i[i] = rand()/1000000000.0;
-    }
-
-    std::string msgx = "Test Vector X";
-    this->print_vector(msgx,xt_f);
-    this->print_vector(msgx,xt_i);
-
-    std::string msgu = "Test Vector U";
-    this->print_vector(msgu,ut_f);
-    this->print_vector(msgu,ut_i);
-
-
-    model::OdometryMotionModel odometry;
-    double res = odometry.calculate(xt_f,xt_i,ut_f,ut_i);
-
-    std::cout << "\n" <<
-        "Odometry: p(xt|ut,xt-1) = " << res << "\n" << std::endl;
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*

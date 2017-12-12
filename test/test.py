@@ -49,14 +49,19 @@ def test_covariance():
     cov_de = np.cov(D,E)
     cov_fg = np.cov(F,G)
     cov_hi = np.cov(H,I)
+    cov_h = np.cov(H)
     cov_j = np.cov(J)
     cov_lk = np.cov(K,L)
     cov_mn = np.cov(M,N)
+    cov_m = np.cov(M)
+    cov_n = np.cov(N)
     cov_o = np.cov(O)
 
-    print(cov_lk)
-    print(cov_mn)
-    print(cov_o)
+    print(M)
+    print(cov_m)
+
+    print(N)
+    print(cov_n)
     
     
 

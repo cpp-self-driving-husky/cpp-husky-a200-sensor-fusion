@@ -6,6 +6,7 @@
 //#include "../src/covariance_matrix.h"
 #include "../src/state_vector.h"
 #include "../src/motion_model.h"
+#include "../src/matrix.h"
 
 
 namespace test {
@@ -17,33 +18,40 @@ namespace test {
             //data::DataMatrix testDataMatrixA(bool output=false);
             //vec::MeanVector testMeanVectorA();
 
-            void testMeanVectorA();
-            void testMeanVectorB(int seed);
+            //void testMeanVectorA();
+            //void testMeanVectorB(int seed);
 
             //void testCovarianceMatrix();
 
             void testMotionModelA();
 
+            void testMatrixA();
+
 
         private:
             void print_matrix(
-                std::string& message, double* matrix,
+                std::string message, double* matrix,
                 int rows, int cols);
             void print_matrix(
-                std::string& message,
+                std::string message,
                 data::DataMatrix& matrix);
 
-            void print_vector(
-                std::string& message,
-                state::MeanVector& vec);
+            //void print_vector(
+            //    std::string message,
+            //    vec::MeanVector& vec);
 
             //void print_matrix(
             //    std::string& message,
             //    cov::CovarianceMatrix& covariance);
 
             void print_vector(
-                std::string& msg,
+                std::string msg,
                 state::StateVector& xt);
+
+            void print_matrix(
+                std::string msg,
+                mtx::Matrix& matrix);
+
 
     };
 
