@@ -1,3 +1,6 @@
+
+/*
+
 #ifndef MEAN_VECTOR_H_
 #define MEAN_VECTOR_H_
 
@@ -33,4 +36,6 @@ namespace vec {
 
 
 #endif // MEAN_VECTOR_H_
+
+*/
 

@@ -1,3 +1,6 @@
+
+/*
+
 #ifndef COVARIANCE_MATRIX_H_
 #define COVARIANCE_MATRIX_H_
 
@@ -39,3 +42,4 @@ namespace cov {
 
 #endif // COVARIANCE_MATRIX_H_
 
+*/

@@ -1,3 +1,5 @@
+/*
+
 #include "data_matrix.h"
 #include <iostream>
 
@@ -79,4 +81,5 @@ int data::DataMatrix::getVars() {
     return this->vars_;
 }
 
+*/
 

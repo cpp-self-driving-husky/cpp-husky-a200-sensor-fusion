@@ -7,6 +7,8 @@ int main(int argc, char* argv[]) {
 
 	test::Test test;
 	test.testMatrixA();
+	//test.testMatrixB();
+	//test.testMotionModelA();
 
 	return 0;
 }

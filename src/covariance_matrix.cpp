@@ -1,3 +1,6 @@
+
+/*
+
 #include "covariance_matrix.h"
 #include "mean_vector.h"
 #include "data_matrix.h"
@@ -59,4 +62,5 @@ int cov::CovarianceMatrix::getVars() {
     return this->vars_;
 }
 
+*/
 

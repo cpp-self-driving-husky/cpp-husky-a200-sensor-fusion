@@ -2,9 +2,9 @@
 #define MATRIX_H_
 
 
-namespace data {
-    class DataMatrix;
-}
+//namespace data {
+//    class DataMatrix;
+//}
 
 namespace state {
     class StateVector;
@@ -29,6 +29,11 @@ namespace mtx {
                 state::StateVector& state,
                 int row);
 
+            void addData(double* data, int meas);
+            void removeData(int meas);
+            void operator*=(double scalar);
+            void transpose();
+
             int getRows();
             int getCols();
             int getSize();
@@ -39,6 +44,9 @@ namespace mtx {
             int cols_;
 
     };
+
+    typedef Matrix DataMatrix;
+    typedef Matrix CovarianceMatrix;
 
 
     class MatrixCalculator {
@@ -51,9 +59,7 @@ namespace mtx {
             void covariance(
                 Matrix& covariance_matrix,
                 state::StateVector& mean_vector,
-                data::DataMatrix& data_matrix);
-
-            //friend operator*=(double scalar, Matrix& matrix);
+                DataMatrix& data_matrix);
 
         private:
 

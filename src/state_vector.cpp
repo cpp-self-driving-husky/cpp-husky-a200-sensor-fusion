@@ -1,5 +1,6 @@
 #include "state_vector.h"
-#include "data_matrix.h"
+//#include "data_matrix.h"
+#include "matrix.h"
 #include <iostream>
 
 
@@ -48,8 +49,8 @@ int state::StateVector::getVars() {
 
 
 // TODO perhaps check if this->vars_ == data_matrix.getVars
-void state::StateVector::mean(data::DataMatrix& data_matrix) {
-    int meas = data_matrix.getMeas();
+void state::StateVector::mean(mtx::DataMatrix& data_matrix) {
+    int meas = data_matrix.getRows();
     for (int v = 0; v < this->vars_; ++v) {
         this->vec_[v] = 0.0;
         for (int m = 0; m < meas; ++m) {

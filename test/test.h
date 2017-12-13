@@ -1,7 +1,7 @@
 #ifndef TEST_H_
 #define TEST_H_
 #include <string>
-#include "../src/data_matrix.h"
+//#include "../src/data_matrix.h"
 //#include "../src/mean_vector.h"
 //#include "../src/covariance_matrix.h"
 #include "../src/state_vector.h"
@@ -27,14 +27,16 @@ namespace test {
 
             void testMatrixA();
 
+            void testMatrixB();
+
 
         private:
-            void print_matrix(
-                std::string message, double* matrix,
-                int rows, int cols);
-            void print_matrix(
-                std::string message,
-                data::DataMatrix& matrix);
+            //void print_matrix(
+            //    std::string message, double* matrix,
+            //    int rows, int cols);
+            //void print_matrix(
+            //    std::string message,
+            //    data::DataMatrix& matrix);
 
             //void print_vector(
             //    std::string message,

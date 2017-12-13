@@ -2,8 +2,14 @@
 #define STATE_VECTOR_H_
 
 
-namespace data {
-    class DataMatrix;
+//namespace data {
+//    class DataMatrix;
+//}
+
+
+namespace mtx {
+    class Matrix;
+    typedef Matrix DataMatrix;
 }
 
 
@@ -17,7 +23,7 @@ namespace state {
 
             void init(int vars);
             void init(double* vec, int vars);
-            void mean(data::DataMatrix& data_matrix);
+            void mean(mtx::DataMatrix& data_matrix);
             double& operator[](int i);
             int getVars();
 

@@ -1,5 +1,5 @@
 #include "state_vector.h"
-#include "data_matrix.h"
+//#include "data_matrix.h"
 #include "matrix.h"
 #include <cmath>
 
@@ -55,6 +55,74 @@ void mtx::Matrix::stateRow(state::StateVector& state, int row) {
 }
 
 
+
+// addData assumes only measurements with same number
+// of variables will be added each time
+// would have to clear old data to add new data
+// to change number of variables
+void mtx::Matrix::addData(double* data, int meas) {
+
+    int orig_size = this->cols_*this->rows_;
+    int new_size = this->cols_*(this->rows_+meas);
+    double* temp = new double[new_size];
+    for (int i = 0; i < orig_size; ++i)
+        temp[i] = this->matrix_[i];
+    for (int i = orig_size; i < new_size; ++i)
+        temp[i] = data[i-orig_size];
+    if (this->matrix_ != nullptr)
+        delete[] this->matrix_;
+    this->matrix_ = temp;
+    this->rows_ += meas;
+
+}
+
+
+// TODO repupose the function so that for meas
+//      a positive number removes older values
+//      a negative number removes newer values
+void mtx::Matrix::removeData(int meas) {
+
+    int orig_size = this->cols_*this->rows_;
+    // TODO check if number of measures to remove
+    //      is greater than measures in data
+    int new_size = this->cols_*(this->rows_-meas);
+    int index = orig_size - new_size;
+    double* temp = new double[new_size];
+    for (int i = index; i < orig_size; ++i)
+        temp[i-index] = this->matrix_[i];
+    // this condition is probably not necessary
+    if (this->matrix_ != nullptr)
+        delete[] this->matrix_;
+    this->matrix_ = temp;
+    this->rows_ -= meas;
+
+}
+
+
+void mtx::Matrix::operator*=(double scalar) {
+    for (int r = 0; r < this->rows_; ++r)
+        for (int c = 0; c < this->cols_; ++c)
+            this->matrix_[r*this->cols_+c] *= scalar;
+}
+
+
+void mtx::Matrix::transpose() {
+    for (int i = 0; i < this->rows_; ++i) {
+        for (int j = i; j < this->cols_; ++j) {
+            int a = i*this->cols_+j;
+            int b = j*this->rows_+i;
+            double ij = this->matrix_[a];
+            double ji = this->matrix_[b];
+            this->matrix_[b] = ij;
+            this->matrix_[a] = ji;
+        }
+    }
+    int dimension = this->rows_;
+    this->rows_ = this->cols_;
+    this->cols_ = dimension;
+}
+
+
 int mtx::Matrix::getRows() {
     return this->rows_;
 }
@@ -84,23 +152,22 @@ mtx::MatrixCalculator::~MatrixCalculator() {
 
 
 void mtx::MatrixCalculator::covariance(
-    mtx::Matrix& covariance_matrix,
+    mtx::CovarianceMatrix& covariance_matrix,
     state::StateVector& mean_vector,
-    data::DataMatrix& data_matrix)
+    mtx::DataMatrix& data_matrix)
 {
-    int meas = data_matrix.getMeas();
-    int vars = data_matrix.getVars();
+    int meas = data_matrix.getRows();
+    int vars = data_matrix.getCols();
     int dimension = covariance_matrix.getRows();
     for (int i = 0; i < dimension; ++i) {
         for (int j = i; j < dimension; ++j) {
             double y_mean = mean_vector[i];
             double x_mean = mean_vector[j];
             double variance = 0.0;
-            for (int k = 0; k < meas; ++k) {
-                double y_s = data_matrix[k*vars+i];
-                double x_s = data_matrix[k*vars+j];
-                variance += (x_s-x_mean)*(y_s-y_mean);
-            }
+            for (int k = 0; k < meas; ++k)
+                variance +=
+                    (data_matrix[k*vars+j]-x_mean) *
+                    (data_matrix[k*vars+i]-y_mean);
             variance /= (meas-1);
             covariance_matrix[i*dimension+j] = variance;
             covariance_matrix[j*dimension+i] = variance;
@@ -127,45 +194,6 @@ void mtx::MatrixCalculator::cholesky(
         }
     }
 }
-
-
-//void mtx::operator*=(double scalar, mtx::Matrix& matrix) {
-//    int rows = matrix.rows_;
-//    int cols = matrix.cols_;
-//    for (int r = 0; r < rows; ++r) {
-//        for (int c = 0; c < cols; ++c) {
-//            matrix[r*cols+c] *= scalar;
-//        }
-//    }
-//}
-
-
-
-
-/*
-void cov::CovarianceMatrix::calculate(
-    data::DataMatrix& data_matrix,
-    vec::MeanVector& mean_vector)
-{
-    int meas = data_matrix.getMeas();
-    int vars = data_matrix.getVars();
-    for (int i = 0; i < this->vars_; ++i) {
-        for (int j = i; j < this->vars_; ++j) {
-            double y_mean = mean_vector[i];
-            double x_mean = mean_vector[j];
-            double variance = 0.0;
-            for (int k = 0; k < meas; ++k) {
-                double y_s = data_matrix[k*vars+i];
-                double x_s = data_matrix[k*vars+j];
-                variance += (x_s-x_mean)*(y_s-y_mean);
-            }
-            variance /= (meas-1);
-            this->matrix_[i*this->vars_+j] = variance;
-            this->matrix_[j*this->vars_+i] = variance;
-        }
-    }
-}
-*/
 
 
 

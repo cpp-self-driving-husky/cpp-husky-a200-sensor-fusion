@@ -1,3 +1,5 @@
+/*
+
 #include "mean_vector.h"
 #include "data_matrix.h"
 
@@ -46,4 +48,7 @@ void vec::MeanVector::calculate(data::DataMatrix& data_matrix) {
 int vec::MeanVector::getVars() {
     return this->vars_;
 }
+
+
+*/
 

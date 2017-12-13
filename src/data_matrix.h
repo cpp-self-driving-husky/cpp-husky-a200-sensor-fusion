@@ -1,3 +1,5 @@
+/*
+
 #ifndef DATA_MATRIX_H_
 #define DATA_MATRIX_H_
 
@@ -20,9 +22,9 @@ namespace data {
 
             // TODO remove this getter function...
             //      for debugging only!
-            double* getData() {
-                return this->data_;
-            }
+            //double* getData() {
+            //    return this->data_;
+            //}
 
 
             int getMeas();
@@ -44,3 +46,5 @@ namespace data {
 }
 
 #endif // DATA_MATRIX_H_
+
+*/
