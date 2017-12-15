@@ -245,6 +245,49 @@ void test::Test::testMatrixTranspose() {
 }
 
 
+void test::Test::testAddVectorMatrix() {
+
+    state::VectorCalculator calculator;
+
+    int rows = 3, cols = 5;
+    state::StateVector state;
+    state.init(cols);
+    state[0] = 5;
+    state[1] = 4;
+    state[2] = 9;
+    state[3] = 2;
+    state[4] = 5;
+
+    mtx::Matrix matrix;
+    matrix.init(rows,cols);
+    matrix[0] = 7;
+    matrix[1] = 2;
+    matrix[2] = 9;
+    matrix[3] = 4;
+    matrix[4] = 1;
+    matrix[5] = 6;
+    matrix[6] = 8;
+    matrix[7] = 4;
+    matrix[8] = 2;
+    matrix[9] = 7;
+    matrix[10] = 8;
+    matrix[11] = 1;
+    matrix[12] = 0;
+    matrix[13] = 3;
+    matrix[14] = 5;
+
+    this->print_matrix("Matrix",matrix);
+    this->print_vector("Vector",state);
+
+    int added_row = 0;
+    calculator.addVectorMatrixRow(state,matrix,added_row);
+
+    this->print_vector("Sum Vector",state);
+
+
+}
+
+
 
 /*
 void test::Test::print_matrix(

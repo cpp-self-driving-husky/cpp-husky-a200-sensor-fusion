@@ -31,6 +31,8 @@ namespace test {
 
             void testMatrixTranspose();
 
+            void testAddVectorMatrix();
+
 
         private:
             //void print_matrix(
