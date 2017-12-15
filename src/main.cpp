@@ -9,7 +9,8 @@ int main(int argc, char* argv[]) {
 	//test.testMatrixA();
 	//test.testMatrixB();
 	//test.testMotionModelA();
-	test.testMatrixTranspose();
+	//test.testMatrixTranspose();
+	test.testAddVectorMatrix();
 
 	return 0;
 }

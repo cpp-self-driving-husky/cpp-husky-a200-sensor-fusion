@@ -105,25 +105,6 @@ void mtx::Matrix::operator*=(double scalar) {
 }
 
 
-/*
-void mtx::Matrix::transpose() {
-    for (int i = 0; i < this->rows_; ++i) {
-        for (int j = i; j < this->cols_; ++j) {
-            int a = i*this->cols_+j;
-            int b = j*this->rows_+i;
-            double ij = this->matrix_[a];
-            double ji = this->matrix_[b];
-            this->matrix_[b] = ij;
-            this->matrix_[a] = ji;
-        }
-    }
-    int dimension = this->rows_;
-    this->rows_ = this->cols_;
-    this->cols_ = dimension;
-}
-*/
-
-
 void mtx::Matrix::setRows(int rows) {
     this->rows_ = rows;
 }
@@ -167,15 +148,11 @@ void mtx::MatrixCalculator::transpose(
 {
     int rows = A.getRows();
     int cols = A.getCols();
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            int ii = i*cols+j;
-            int jj = j*rows+i;
-            T[jj] = A[ii];
-        }
-    }
-    T.setRows(A.getCols());
-    T.setCols(A.getRows());
+    for (int i = 0; i < rows; ++i)
+        for (int j = 0; j < cols; ++j)
+            T[j*rows+i] = A[i*cols+j];
+    T.setRows(cols);
+    T.setCols(rows);
 }
 
 

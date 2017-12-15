@@ -59,3 +59,31 @@ void state::StateVector::mean(mtx::DataMatrix& data_matrix) {
     }
 }
 
+
+state::VectorCalculator::VectorCalculator() {
+
+}
+
+
+state::VectorCalculator::~VectorCalculator() {
+
+}
+
+
+void state::VectorCalculator::addVectorMatrixRow(
+    state::StateVector& state,
+    mtx::Matrix& matrix,
+    int init_row)
+{
+    int cols = matrix.getCols();
+    int init_elem = init_row * cols;
+    for (int i = 0; i < cols; ++i)
+        state[i] += matrix[init_elem+i];
+}
+
+
+
+
+// end of file
+
+
