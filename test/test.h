@@ -29,6 +29,8 @@ namespace test {
 
             void testMatrixB();
 
+            void testMatrixTranspose();
+
 
         private:
             //void print_matrix(

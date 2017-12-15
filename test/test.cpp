@@ -164,9 +164,9 @@ void test::Test::testMatrixB() {
     //matrix[10] = 7;
     //matrix[11] = 4;
 
-    print_matrix("Original Matrix",matrix);
-    matrix.transpose();
-    print_matrix("Transposed Matrix",matrix);
+    //print_matrix("Original Matrix",matrix);
+    //matrix.transpose();
+    //print_matrix("Transposed Matrix",matrix);
 
 }
 
@@ -207,6 +207,39 @@ void test::Test::testMotionModelA() {
 
     std::cout << "\n" <<
         "Odometry: p(xt|ut,xt-1) = " << res << "\n" << std::endl;
+
+
+}
+
+
+void test::Test::testMatrixTranspose() {
+
+    mtx::MatrixCalculator calculator;
+
+    int rows = 3, cols = 4;
+    mtx::Matrix A;
+    A.init(rows,cols);
+    A[0] = 7;
+    A[1] = 2;
+    A[2] = 6;
+    A[3] = 9;
+    A[4] = 1;
+    A[5] = 7;
+    A[6] = 8;
+    A[7] = 4;
+    A[8] = 3;
+    A[9] = 7;
+    A[10] = 5;
+    A[11] = 9;
+
+    mtx::Matrix T;
+    T.init(3,4);
+
+    this->print_matrix("Pre Trans A",A);
+    this->print_matrix("Pre Trans T",T);
+    calculator.transpose(A,T);
+    this->print_matrix("Post Trans A",A);
+    this->print_matrix("Post Trans T",T);
 
 
 }
