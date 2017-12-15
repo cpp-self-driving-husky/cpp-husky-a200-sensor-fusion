@@ -2,11 +2,6 @@
 #define STATE_VECTOR_H_
 
 
-//namespace data {
-//    class DataMatrix;
-//}
-
-
 namespace mtx {
     class Matrix;
     typedef Matrix DataMatrix;
@@ -36,22 +31,6 @@ namespace state {
     typedef StateVector ControlVector;
     typedef StateVector MeasurementVector;
     typedef StateVector ParameterVector;
-
-
-    /*
-    class MeanVector : public StateVector {
-
-        public:
-            MeanVector();
-            ~MeanVector();
-
-            void calculate(data::DataMatrix& data_matrix);
-
-        private:
-
-
-    };
-    */
 
 }
 

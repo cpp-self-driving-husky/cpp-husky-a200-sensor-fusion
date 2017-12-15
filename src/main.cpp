@@ -6,9 +6,10 @@
 int main(int argc, char* argv[]) {
 
 	test::Test test;
-	test.testMatrixA();
+	//test.testMatrixA();
 	//test.testMatrixB();
 	//test.testMotionModelA();
+	test.testMatrixTranspose();
 
 	return 0;
 }

@@ -2,10 +2,6 @@
 #define MATRIX_H_
 
 
-//namespace data {
-//    class DataMatrix;
-//}
-
 namespace state {
     class StateVector;
 }
@@ -32,7 +28,11 @@ namespace mtx {
             void addData(double* data, int meas);
             void removeData(int meas);
             void operator*=(double scalar);
-            void transpose();
+
+            //void transpose();
+
+            void setRows(int rows);
+            void setCols(int cols);
 
             int getRows();
             int getCols();
@@ -55,11 +55,12 @@ namespace mtx {
             MatrixCalculator();
             ~MatrixCalculator();
 
-            void cholesky(Matrix& A, Matrix& L);
+            void transpose(Matrix& A, Matrix& T);
             void covariance(
                 Matrix& covariance_matrix,
                 state::StateVector& mean_vector,
                 DataMatrix& data_matrix);
+            void cholesky(Matrix& A, Matrix& L);
 
         private:
 

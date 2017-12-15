@@ -1,5 +1,4 @@
 #include "state_vector.h"
-//#include "data_matrix.h"
 #include "matrix.h"
 #include <iostream>
 
@@ -59,23 +58,4 @@ void state::StateVector::mean(mtx::DataMatrix& data_matrix) {
         this->vec_[v] /= meas;
     }
 }
-
-
-
-
-/*
-
-state::MeanVector::MeanVector() :
-    StateVector()
-{}
-
-
-state::MeanVector::~MeanVector() {
-    // empty dtor
-}
-
-*/
-
-
-
 

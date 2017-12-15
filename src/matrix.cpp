@@ -1,5 +1,4 @@
 #include "state_vector.h"
-//#include "data_matrix.h"
 #include "matrix.h"
 #include <cmath>
 
@@ -106,6 +105,7 @@ void mtx::Matrix::operator*=(double scalar) {
 }
 
 
+/*
 void mtx::Matrix::transpose() {
     for (int i = 0; i < this->rows_; ++i) {
         for (int j = i; j < this->cols_; ++j) {
@@ -120,6 +120,17 @@ void mtx::Matrix::transpose() {
     int dimension = this->rows_;
     this->rows_ = this->cols_;
     this->cols_ = dimension;
+}
+*/
+
+
+void mtx::Matrix::setRows(int rows) {
+    this->rows_ = rows;
+}
+
+
+void mtx::Matrix::setCols(int cols) {
+    this->cols_ = cols;
 }
 
 
@@ -148,6 +159,23 @@ mtx::MatrixCalculator::MatrixCalculator() {
 
 mtx::MatrixCalculator::~MatrixCalculator() {
 
+}
+
+
+void mtx::MatrixCalculator::transpose(
+    mtx::Matrix& A, mtx::Matrix& T)
+{
+    int rows = A.getRows();
+    int cols = A.getCols();
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            int ii = i*cols+j;
+            int jj = j*rows+i;
+            T[jj] = A[ii];
+        }
+    }
+    T.setRows(A.getCols());
+    T.setCols(A.getRows());
 }
 
 
