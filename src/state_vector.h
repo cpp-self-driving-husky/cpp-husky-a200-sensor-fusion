@@ -13,6 +13,7 @@ namespace state {
     class StateVector {
 
         public:
+            StateVector();
             StateVector(int vars);
             ~StateVector();
 
@@ -40,29 +41,6 @@ namespace state {
     typedef StateVector ControlVector;
     typedef StateVector MeasurementVector;
     typedef StateVector ParameterVector;
-
-
-    /*
-    class VectorCalculator {
-
-        public:
-            VectorCalculator();
-            ~VectorCalculator();
-
-            void addVectorMatrixRow(
-                StateVector& state,
-                mtx::Matrix& matrix,
-                int init_row);
-            void subVectorMatrixRow(
-                StateVector& state,
-                mtx::Matrix& matrix,
-                int init_row);
-
-
-        private:
-
-    };
-    */
 
 }
 

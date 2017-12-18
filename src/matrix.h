@@ -12,7 +12,6 @@ namespace mtx {
     class Matrix {
 
         public:
-            //Matrix();
             Matrix(int rows, int cols);
             ~Matrix();
 
@@ -39,10 +38,6 @@ namespace mtx {
                 state::StateVector& mean_vector);
             void cholesky(Matrix& L);
 
-            //void replicate(Matrix& matrix);
-
-            //void destroy();
-
             void setRows(int rows);
             void setCols(int cols);
 
@@ -59,29 +54,6 @@ namespace mtx {
 
     typedef Matrix DataMatrix;
     typedef Matrix CovarianceMatrix;
-
-
-    /*
-
-    class MatrixCalculator {
-
-        public:
-            MatrixCalculator();
-            ~MatrixCalculator();
-
-            void transpose(Matrix& A, Matrix& T);
-            void covariance(
-                Matrix& covariance_matrix,
-                state::StateVector& mean_vector,
-                DataMatrix& data_matrix);
-            void cholesky(Matrix& A, Matrix& L);
-
-        private:
-
-
-    };
-
-    */
 
 }
 

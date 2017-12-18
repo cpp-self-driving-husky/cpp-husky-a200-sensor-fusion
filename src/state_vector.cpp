@@ -3,6 +3,11 @@
 #include <iostream>
 
 
+state::StateVector::StateVector() :
+    vec_(nullptr),vars_(0)
+{}
+
+
 state::StateVector::StateVector(int vars) :
     vec_(nullptr), vars_(vars)
 {
@@ -84,44 +89,6 @@ int state::StateVector::getVars() {
 }
 
 
-
-/*
-
-state::VectorCalculator::VectorCalculator() {
-
-}
-
-
-state::VectorCalculator::~VectorCalculator() {
-
-}
-
-
-void state::VectorCalculator::addVectorMatrixRow(
-    state::StateVector& state,
-    mtx::Matrix& matrix,
-    int init_row)
-{
-    int cols = matrix.getCols();
-    int init_elem = init_row * cols;
-    for (int i = 0; i < cols; ++i)
-        state[i] += matrix[init_elem+i];
-}
-
-
-void state::VectorCalculator::subVectorMatrixRow(
-    state::StateVector& state,
-    mtx::Matrix& matrix,
-    int init_row)
-{
-    int cols = matrix.getCols();
-    int init_elem = init_row * cols;
-    for (int i = 0; i < cols; ++i)
-        state[i] -= matrix[init_elem+i];
-}
-
-
-*/
 
 
 // end of file
