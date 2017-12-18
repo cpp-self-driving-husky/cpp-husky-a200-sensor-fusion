@@ -34,6 +34,7 @@ namespace test {
             void testAddVectorMatrix();
 
 
+
         private:
             //void print_matrix(
             //    std::string message, double* matrix,
