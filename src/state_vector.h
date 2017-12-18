@@ -13,12 +13,21 @@ namespace state {
     class StateVector {
 
         public:
-            StateVector();
+            StateVector(int vars);
             ~StateVector();
 
             void init(int vars);
-            void init(double* vec, int vars);
+            void replicate(StateVector& state);
+            void destroy();
+
             void mean(mtx::DataMatrix& data_matrix);
+            void addVectorMatrixRow(
+                mtx::Matrix& matrix,
+                int init_row);
+            void subVectorMatrixRow(
+                mtx::Matrix& matrix,
+                int init_row);
+
             double& operator[](int i);
             int getVars();
 
@@ -33,6 +42,7 @@ namespace state {
     typedef StateVector ParameterVector;
 
 
+    /*
     class VectorCalculator {
 
         public:
@@ -43,12 +53,16 @@ namespace state {
                 StateVector& state,
                 mtx::Matrix& matrix,
                 int init_row);
+            void subVectorMatrixRow(
+                StateVector& state,
+                mtx::Matrix& matrix,
+                int init_row);
 
 
         private:
 
-
     };
+    */
 
 }
 

@@ -68,8 +68,8 @@ double model::MotionModel::variance(
 
 model::OdometryMotionModel::OdometryMotionModel() :
     MotionModel(),
-    delta_i_(state::ParameterVector()),
-    delta_f_(state::ParameterVector())
+    delta_i_(state::ParameterVector(0)),
+    delta_f_(state::ParameterVector(0))
 {
     int def_vars = 3;
     this->delta_i_.init(def_vars);

@@ -12,10 +12,14 @@ namespace mtx {
     class Matrix {
 
         public:
-            Matrix();
+            //Matrix();
+            Matrix(int rows, int cols);
             ~Matrix();
 
             void init(int rows, int cols);
+            void replicate(Matrix& matrix);
+            void destroy();
+
             double elem(int row, int col);
             double& operator[](int i);
             void stateCol(
@@ -29,7 +33,15 @@ namespace mtx {
             void removeData(int meas);
             void operator*=(double scalar);
 
-            //void transpose();
+            void transpose(Matrix& T);
+            void covariance(
+                Matrix& covariance_matrix,
+                state::StateVector& mean_vector);
+            void cholesky(Matrix& L);
+
+            //void replicate(Matrix& matrix);
+
+            //void destroy();
 
             void setRows(int rows);
             void setCols(int cols);
@@ -49,6 +61,8 @@ namespace mtx {
     typedef Matrix CovarianceMatrix;
 
 
+    /*
+
     class MatrixCalculator {
 
         public:
@@ -66,6 +80,8 @@ namespace mtx {
 
 
     };
+
+    */
 
 }
 

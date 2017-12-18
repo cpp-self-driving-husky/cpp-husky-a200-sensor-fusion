@@ -3,30 +3,51 @@
 #include <cmath>
 
 
-mtx::Matrix::Matrix() :
-    matrix_(nullptr),
-    rows_(0), cols_(0)
-{}
+//mtx::Matrix::Matrix() :
+//    matrix_(nullptr),
+//    rows_(0), cols_(0)
+//{}
+
+
+mtx::Matrix::Matrix(int rows, int cols) :
+    matrix_(nullptr), rows_(rows), cols_(cols)
+{
+    this->init(rows,cols);
+}
 
 
 mtx::Matrix::~Matrix() {
-    if (this->matrix_ != nullptr) {
-        delete[] this->matrix_;
-        this->matrix_ = nullptr;
-    }
-    rows_ = cols_ = 0;
+    this->destroy();
 }
 
 
 void mtx::Matrix::init(int rows, int cols) {
-    if (this->matrix_ != nullptr)
-        delete[] this->matrix_;
+    //if (this->matrix_ != nullptr)
+    //    delete[] this->matrix_;
+    this->destroy();
     this->rows_ = rows;
     this->cols_ = cols;
     int elem = this->rows_ * this->cols_;
     this->matrix_ = new double[elem];
     for (int i = 0; i < elem; ++i)
         this->matrix_[i] = 0.0;
+}
+
+
+// TODO check to make sure other matrix is proper size
+void mtx::Matrix::replicate(mtx::Matrix& matrix) {
+    int elems = this->rows_*this->cols_;
+    for (int i = 0; i < elems; ++i)
+        matrix[i] = this->matrix_[i];
+}
+
+
+void mtx::Matrix::destroy() {
+    if (this->matrix_ != nullptr) {
+        delete[] this->matrix_;
+        this->matrix_ = nullptr;
+    }
+    rows_ = cols_ = 0;
 }
 
 
@@ -105,6 +126,57 @@ void mtx::Matrix::operator*=(double scalar) {
 }
 
 
+void mtx::Matrix::transpose(mtx::Matrix& T) {
+    for (int i = 0; i < this->rows_; ++i)
+        for (int j = 0; j < this->cols_; ++j)
+            T[j*this->rows_+i] = this->matrix_[i*this->cols_+j];
+    T.setRows(this->cols_);
+    T.setCols(this->rows_);
+}
+
+
+void mtx::Matrix::covariance(
+    mtx::CovarianceMatrix& covariance_matrix,
+    state::StateVector& mean_vector)
+{
+    int meas = this->rows_;
+    int vars = this->cols_;
+    int dimension = covariance_matrix.getRows();
+    for (int i = 0; i < dimension; ++i) {
+        for (int j = i; j < dimension; ++j) {
+            double y_mean = mean_vector[i];
+            double x_mean = mean_vector[j];
+            double variance = 0.0;
+            for (int k = 0; k < meas; ++k)
+                variance +=
+                    (this->matrix_[k*vars+j]-x_mean) *
+                    (this->matrix_[k*vars+i]-y_mean);
+            variance /= (meas-1);
+            covariance_matrix[i*dimension+j] = variance;
+            covariance_matrix[j*dimension+i] = variance;
+        }
+    }
+}
+
+
+void mtx::Matrix::cholesky(mtx::Matrix& L) {
+    int n = this->rows_;
+    int elems = L.getRows()*L.getCols();
+    for (int i = 0; i < elems; ++i)
+        L[i] = 0.0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < (i+1); ++j) {
+            double s = 0.0;
+            for (int k = 0; k < j; k++)
+                s += L[i*n+k] * L[j*n+k];
+            L[i*n+j] = (i == j) ?
+                std::sqrt(this->matrix_[i*n+i] - s) :
+                (1.0 / L[j*n+j] * (this->matrix_[i*n+j] - s));
+        }
+    }
+}
+
+
 void mtx::Matrix::setRows(int rows) {
     this->rows_ = rows;
 }
@@ -132,6 +204,12 @@ int mtx::Matrix::getSize() {
 
 // Matrix Calculator class
 
+
+
+
+
+
+/*
 
 mtx::MatrixCalculator::MatrixCalculator() {
 
@@ -200,5 +278,6 @@ void mtx::MatrixCalculator::cholesky(
     }
 }
 
+*/
 
 
