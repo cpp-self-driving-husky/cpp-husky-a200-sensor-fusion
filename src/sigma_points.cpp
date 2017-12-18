@@ -36,6 +36,7 @@ void sigma::SigmaPoints::destroy() {
 }
 
 
+// perhaps calculate cholesky outside of this function?
 void sigma::SigmaPoints::generatePoints(
     state::StateVector& state,
     mtx::CovarianceMatrix& covariance_matrix,
@@ -45,14 +46,15 @@ void sigma::SigmaPoints::generatePoints(
     covariance_matrix.cholesky(cholesky_matrix);
     cholesky_matrix *= gamma;
     int vars = state.getVars();
-    for (int i = 0; i < vars; ++i)
-        this->points_[0][i] = state[i];
-    for (int n = 1; n < this->state_size_+1; ++n)
+    for (int n = 0; n < this->elements_; ++n)
         for (int i = 0; i < vars; ++i)
-            this->points_[n].addVectorMatrixRow(cholesky_matrix,i);
-    for (int n = this->state_size_+1; n < this->elements_; ++n)
-        for (int i = 0; i < vars; ++i)
-            this->points_[n].subVectorMatrixRow(cholesky_matrix,i);
+            this->points_[n][i] = state[i];
+    int offset = 1;
+    for (int n = offset; n < this->state_size_+1; ++n)
+        this->points_[n].addVectorMatrixRow(cholesky_matrix,n-offset);
+    offset = this->state_size_+1;
+    for (int n = offset; n < this->elements_; ++n)
+        this->points_[n].subVectorMatrixRow(cholesky_matrix,n-offset);
 }
 
 
