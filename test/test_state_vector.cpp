@@ -1,13 +1,13 @@
 #include <iostream>
 #include <string>
 #include "../src/state_vector.h"
-#include "../src/matrix.h"
+//#include "../src/matrix.h"
 
 
 
-void print_vector(
+void printVector(
     std::string msg,
-    state::StateVector& xt)
+    state::StateVector<double>& xt)
 {
     std::cout << "\n" << msg << "\n";
     int vars = xt.getVars();
@@ -18,6 +18,22 @@ void print_vector(
 }
 
 
+
+void testStateVectorA() {
+
+    int num = 5;
+    state::StateVector<double> state_vector(num);
+    for (int i = 0; i < num; ++i)
+        state_vector[i] = i;
+    printVector("State Vector",state_vector);
+
+}
+
+
+
+
+
+/*
 
 void testStateVectorB() {
 
@@ -43,6 +59,7 @@ void testStateVectorB() {
 
 }
 
+*/
 
 
 
@@ -150,11 +167,7 @@ void testMeanVectorA() {
 
 
 int main(int argc, char* argv[]) {
-
-    testStateVectorB();
-
-
-
+    testStateVectorA();
     return 0;
 }
 

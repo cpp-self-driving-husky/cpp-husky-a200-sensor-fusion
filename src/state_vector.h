@@ -2,45 +2,88 @@
 #define STATE_VECTOR_H_
 
 
-namespace mtx {
-    class Matrix;
-    typedef Matrix DataMatrix;
-}
-
-
 namespace state {
 
+    template<class T>
     class StateVector {
 
         public:
-            StateVector();
-            StateVector(int vars);
-            ~StateVector();
+            StateVector(int vars) :
+                vec_(nullptr), vars_(vars)
+            {
+                this->init(vars);
+            }
 
-            void init(int vars);
-            void replicate(StateVector& state);
-            void destroy();
+            ~StateVector() {
+                this->destroy();
+            }
 
-            void mean(mtx::DataMatrix& data_matrix);
+            void init(int vars) {
+                this->destroy();
+                this->vars_ = vars;
+                this->vec_ = new T[this->vars_];
+                for (int i = 0; i < this->vars_; ++i)
+                    this->vec_[i] = 0.0;
+            }
+
+            void replicate(StateVector& state) {
+                for (int i = 0; i < this->vars_; ++i)
+                    state[i] = this->vec_[i];
+            }
+
+            void destroy() {
+                if (this->vec_ != nullptr) {
+                    delete[] this->vec_;
+                    this->vec_ = nullptr;
+                }
+                this->vars_ = 0;
+            }
+
+            /*
             void addVectorMatrixRow(
                 mtx::Matrix& matrix,
-                int init_row);
+                int init_row)
+            {
+                int cols = matrix.getCols();
+                int init_elem = init_row * cols;
+                for (int i = 0; i < cols; ++i)
+                    this->vec_[i] += matrix[init_elem+i];
+            }
+
             void subVectorMatrixRow(
                 mtx::Matrix& matrix,
-                int init_row);
+                int init_row)
+            {
+                int cols = matrix.getCols();
+                int init_elem = init_row * cols;
+                for (int i = 0; i < cols; ++i)
+                    this->vec_[i] -= matrix[init_elem+i];
+            }
+            */
 
-            double& operator[](int i);
-            int getVars();
+            T& operator[](int i) {
+                return this->vec_[i];
+            }
 
-        protected:
-            double* vec_;
+            int getVars() {
+                return this->vars_;
+            }
+
+        private:
+            T* vec_;
             int vars_;
 
     };
 
-    typedef StateVector ControlVector;
-    typedef StateVector MeasurementVector;
-    typedef StateVector ParameterVector;
+    template<class T>
+    using ControlVector = StateVector<T>;
+
+    template<class T>
+    using MeasurementVector = StateVector<T>;
+
+    template<class T>
+    using ParameterVector = StateVector<T>;
+
 
 }
 

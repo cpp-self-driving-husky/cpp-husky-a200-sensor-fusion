@@ -2,6 +2,86 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include "../src/matrix.h"
+
+
+void printVector(
+    std::string msg,
+    state::StateVector<double>& xt)
+{
+    std::cout << "\n" << msg << "\n";
+    int vars = xt.getVars();
+    for (int i = 0; i < vars; ++i)
+        std::cout << xt[i] << " ";
+    std::cout << "\n" <<
+        "variables " << vars << "\n\n";
+
+}
+
+
+void printMatrix(std::string msg, mtx::Matrix<double>& matrix) {
+    std::cout << msg << "\n";
+    for (int r = 0; r < matrix.getRows(); ++r) {
+        for (int c = 0; c < matrix.getCols(); ++c) {
+            std::cout << matrix[r*matrix.getCols()+c] << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout <<
+        "rows: " << matrix.getRows() << ", " <<
+        "cols: " << matrix.getCols() << "\n";
+    std::cout << std::endl;
+}
+
+
+
+void testMatrixA() {
+
+    std::vector<double> covariance_samples = {
+        10,4,21,7,13,
+        23,1,6,9,17,
+        3,11,5,4,31,
+        5,19,24,8,8,
+        15,29,11,9,14
+    };
+    int side = 5;
+    int elems = side*side;
+    mtx::Matrix<double> data_matrix(side,side);
+    for (int i = 0; i < elems; ++i)
+        data_matrix[i] = covariance_samples[i];
+
+    state::StateVector<double> mean_vector(side);
+    data_matrix.mean(mean_vector);
+    //mtx::Matrix<double> covariance_matrix(side,side);
+    //data_matrix.covariance(covariance_matrix,mean_vector);
+
+    //mtx::Matrix<double> cholesky_matrix(side,side);
+    //covariance_matrix.cholesky(cholesky_matrix);
+
+    printMatrix("Original Matrix",data_matrix);
+    printVector("Mean Vector",mean_vector);
+    //printMatrix("Covariance Matrix",covariance_matrix);
+    //printMatrix("Cholesky Matrix",cholesky_matrix);
+
+}
+
+
+
+
+int main(int argc, char* argv[]) {
+    testMatrixA();
+    return 0;
+}
+
+
+
+
+/*
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
 #include "../src/state_vector.h"
 #include "../src/matrix.h"
 
@@ -123,3 +203,5 @@ int main(int argc, char* argv[]) {
 
 // end of file
 
+
+*/
