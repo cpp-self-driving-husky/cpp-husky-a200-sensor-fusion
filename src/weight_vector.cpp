@@ -1,3 +1,6 @@
+/*
+
+
 #include <cmath>
 #include "weight_vector.h"
 
@@ -76,4 +79,7 @@ double& weight::WeightVector::ithCovariance(int i) {
 
 
 // end of file
+
+
+*/
 

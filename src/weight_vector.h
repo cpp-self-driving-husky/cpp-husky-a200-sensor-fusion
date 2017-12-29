@@ -1,3 +1,6 @@
+/*
+
+
 #ifndef WEIGHT_VECTOR_H_
 #define WEIGHT_VECTOR_H_
 
@@ -42,3 +45,5 @@ namespace weight {
 
 #endif // WEIGHT_VECTOR_H_
 
+
+*/
