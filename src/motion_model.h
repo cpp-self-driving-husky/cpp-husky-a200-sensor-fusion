@@ -71,7 +71,6 @@ namespace model {
 
         private:
 
-
     };
 
 
@@ -132,7 +131,6 @@ namespace model {
 
             }
 
-
         private:
             double init_rotation(
                 state::StateVector<T>& x_tf,
@@ -190,4 +188,6 @@ namespace model {
 
 
 #endif // MOTION_MODEL_H_
+
+
 

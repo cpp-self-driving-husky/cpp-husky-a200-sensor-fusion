@@ -59,15 +59,12 @@ namespace sigma {
                     cholesky_matrix.subVectorMatrixRow(this->points_[n],n-offset);
             }
 
-            double calculateLambda(
-                double alpha, double kappa, int n)
-            {
-                return std::pow(alpha,2)*(n+kappa)-n;
+            T calculateLambda(double alpha, double kappa) {
+                return this->points_[0].calculateLambda(alpha,kappa);
             }
 
-
-            double calculateGamma(double lambda, int n) {
-                return std::sqrt(n+lambda);
+            T calculateGamma(double alpha, double kappa) {
+                return this->points_[0].calculateGamma(alpha,kappa);
             }
 
             int pointsPerState(int state_size) {
