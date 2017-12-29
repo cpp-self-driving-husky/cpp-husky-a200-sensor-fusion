@@ -1,3 +1,6 @@
+
+/*
+
 #include "state_vector.h"
 #include "matrix.h"
 #include <iostream>
@@ -93,4 +96,5 @@ int state::StateVector::getVars() {
 
 // end of file
 
+*/
 

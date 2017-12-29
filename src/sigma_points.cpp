@@ -1,3 +1,5 @@
+/*
+
 #include <cmath>
 #include "sigma_points.h"
 #include "state_vector.h"
@@ -88,4 +90,7 @@ int sigma::SigmaPoints::getSize() {
 
 
 // end of file
+
+*/
+
 
