@@ -7,11 +7,9 @@
 #include "../src/sigma_points.h"
 
 
-
-
 void printStateVector(
     std::string msg,
-    state::StateVector& xt)
+    state::StateVector<double>& xt)
 {
     std::cout << "\n" << msg << "\n";
     int vars = xt.getVars();
@@ -23,7 +21,7 @@ void printStateVector(
 }
 
 
-void printMatrix(std::string msg, mtx::Matrix& matrix) {
+void printMatrix(std::string msg, mtx::Matrix<double>& matrix) {
     std::cout << "\n" << msg << "\n";
     for (int r = 0; r < matrix.getRows(); ++r) {
         for (int c = 0; c < matrix.getCols(); ++c) {
@@ -38,7 +36,7 @@ void printMatrix(std::string msg, mtx::Matrix& matrix) {
 }
 
 
-void printSigmaPoints(std::string msg, sigma::SigmaPoints& sigma_points) {
+void printSigmaPoints(std::string msg, sigma::SigmaPoints<double>& sigma_points) {
     int num_points = sigma_points.getSize();
     int vars = sigma_points[0].getVars();
     std::cout << "\n" << msg << "\n";
@@ -70,7 +68,7 @@ void printVector(std::string msg, std::vector<double>& vec, int newline=-1) {
 void testSigmaPointsA() {
 
     int state_size = 5;
-    sigma::SigmaPoints sigma_points(state_size);
+    sigma::SigmaPoints<double> sigma_points(state_size);
     //printSigmaPoints("Sigma Points",sigma_points);
 
     double alpha = 0.48;
@@ -92,20 +90,20 @@ void testSigmaPointsA() {
     for (size_t i = 0; i < samples.size(); ++i)
         samples[i] = rand() % 20;
 
-    mtx::Matrix data_matrix(data_rows,data_cols);
+    mtx::Matrix<double> data_matrix(data_rows,data_cols);
     for (int i = 0; i < data_matrix.getSize(); ++i)
         data_matrix[i] = samples[i];
     //printMatrix("Data Matrix",data_matrix);
 
-    state::StateVector state(data_cols);
-    state.mean(data_matrix);
+    state::StateVector<double> state(data_cols);
+    data_matrix.mean(state);
     //printStateVector("State Vector",state);
 
-    mtx::CovarianceMatrix covariance(data_cols,data_cols);
+    mtx::CovarianceMatrix<double> covariance(data_cols,data_cols);
     data_matrix.covariance(covariance,state);
     //printMatrix("Covariance Matrix",covariance);
 
-    mtx::Matrix cholesky(data_cols,data_cols);
+    mtx::Matrix<double> cholesky(data_cols,data_cols);
     //covariance.cholesky(cholesky);
     //printMatrix("Cholesky Matrix",cholesky);
     //std::cout << "gamma " << gamma << "\n";
@@ -115,9 +113,6 @@ void testSigmaPointsA() {
     //    sigma_points[4][i] = i;
 
     sigma_points.generatePoints(state,covariance,cholesky,gamma);
-
-
-
 
     printSigmaPoints("Sigma Points", sigma_points);
 

@@ -52,16 +52,63 @@ void testMatrixA() {
 
     state::StateVector<double> mean_vector(side);
     data_matrix.mean(mean_vector);
-    //mtx::Matrix<double> covariance_matrix(side,side);
-    //data_matrix.covariance(covariance_matrix,mean_vector);
+    mtx::Matrix<double> covariance_matrix(side,side);
+    data_matrix.covariance(covariance_matrix,mean_vector);
 
-    //mtx::Matrix<double> cholesky_matrix(side,side);
-    //covariance_matrix.cholesky(cholesky_matrix);
+    mtx::Matrix<double> cholesky_matrix(side,side);
+    covariance_matrix.cholesky(cholesky_matrix);
 
     printMatrix("Original Matrix",data_matrix);
     printVector("Mean Vector",mean_vector);
-    //printMatrix("Covariance Matrix",covariance_matrix);
-    //printMatrix("Cholesky Matrix",cholesky_matrix);
+    printMatrix("Covariance Matrix",covariance_matrix);
+    printMatrix("Cholesky Matrix",cholesky_matrix);
+
+}
+
+
+
+void testMatrixB() {
+
+    int cols = 5;
+    std::vector<double> state_samples = {5,2,8,1,6};
+    state::StateVector<double> state(cols);
+    for (int i = 0; i < cols; ++i)
+        state[i] = state_samples[i];
+
+    std::vector<double> matrix_samples = { 3,4,7,2,9,6,8,4,3,1,7,9,8,2,5 };
+    int vars = static_cast<int>(matrix_samples.size());
+    int rows = vars/cols;
+    mtx::Matrix<double> matrix(rows,cols);
+    matrix.init(rows,cols);
+    for (int i = 0; i < vars; ++i)
+        matrix[i] = matrix_samples[i];
+
+    state::StateVector<double> copied_state(cols);
+    state.replicate(copied_state);
+
+    printVector("Original Vector",state);
+    printVector("Copied Vector",copied_state);
+    printMatrix("Original Matrix",matrix);
+    matrix.addVectorMatrixRow(state,1);
+    matrix.mean(copied_state);
+    printVector("Added Vector",state);
+    printVector("Copied Mean Vector",copied_state);
+    matrix.subVectorMatrixRow(copied_state,0);
+    printVector("Copied Mean Sub Vector",copied_state);
+
+    mtx::Matrix<double> copied_matrix(rows,cols);
+    matrix.replicate(copied_matrix);
+    printMatrix("Copied Matrix",copied_matrix);
+
+    matrix.transpose(copied_matrix);
+    printMatrix("Copied Transpose Matrix",copied_matrix);
+
+    state::StateVector<double> mean_state(copied_matrix.getCols());
+    copied_matrix.mean(mean_state);
+    printVector("Copied Mean Vector",mean_state);
+
+    copied_matrix.init(matrix.getRows(),matrix.getCols());
+    printMatrix("Reinitialized Matrix",copied_matrix);
 
 }
 
@@ -69,7 +116,7 @@ void testMatrixA() {
 
 
 int main(int argc, char* argv[]) {
-    testMatrixA();
+    testMatrixB();
     return 0;
 }
 
