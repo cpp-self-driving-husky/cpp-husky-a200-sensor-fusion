@@ -8,6 +8,11 @@ namespace state {
     class StateVector {
 
         public:
+
+            StateVector() :
+                vec_(nullptr), vars_(0)
+            {}
+
             StateVector(int vars) :
                 vec_(nullptr), vars_(vars)
             {
@@ -38,28 +43,6 @@ namespace state {
                 }
                 this->vars_ = 0;
             }
-
-            /*
-            void addVectorMatrixRow(
-                mtx::Matrix& matrix,
-                int init_row)
-            {
-                int cols = matrix.getCols();
-                int init_elem = init_row * cols;
-                for (int i = 0; i < cols; ++i)
-                    this->vec_[i] += matrix[init_elem+i];
-            }
-
-            void subVectorMatrixRow(
-                mtx::Matrix& matrix,
-                int init_row)
-            {
-                int cols = matrix.getCols();
-                int init_elem = init_row * cols;
-                for (int i = 0; i < cols; ++i)
-                    this->vec_[i] -= matrix[init_elem+i];
-            }
-            */
 
             T& operator[](int i) {
                 return this->vec_[i];

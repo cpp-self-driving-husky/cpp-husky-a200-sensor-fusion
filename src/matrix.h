@@ -69,6 +69,24 @@ namespace mtx {
                     state[i] = this->matrix_[i+init_elem];
             }
 
+            void addVectorMatrixRow(
+                state::StateVector<T>& state,
+                int init_row)
+            {
+                int init_elem = init_row * this->cols_;
+                for (int i = 0; i < this->cols_; ++i)
+                    state[i] += this->matrix_[init_elem+i];
+            }
+
+            void subVectorMatrixRow(
+                state::StateVector<T>& state,
+                int init_row)
+            {
+                int init_elem = init_row * this->cols_;
+                for (int i = 0; i < this->cols_; ++i)
+                    state[i] -= this->matrix_[init_elem+i];
+            }
+
             void addData(T* data, int meas) {
                 int orig_size = this->cols_*this->rows_;
                 int new_size = this->cols_*(this->rows_+meas);

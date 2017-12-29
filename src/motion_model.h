@@ -1,38 +1,72 @@
 #ifndef MOTION_MODEL_H_
 #define MOTION_MODEL_H_
+#include <cmath>
 #include "state_vector.h"
+
+
+namespace {
+
+    // TODO these are empirically found values
+    //      and will be modified after their
+    //      empirical values are tested
+    const double alpha_1 = 1.0;
+    const double alpha_2 = 1.0;
+    const double alpha_3 = 1.0;
+    const double alpha_4 = 1.0;
+
+}
 
 
 namespace model {
 
+    template<class T>
     class MotionModel {
 
         public:
-            MotionModel();
-            virtual ~MotionModel();
+            MotionModel() {
+
+            }
+
+            virtual ~MotionModel() {
+
+            }
 
         protected:
             virtual double calculate(
-                state::StateVector& x_tf,
-                state::StateVector& x_ti,
-                state::ControlVector& u_tf,
-                state::ControlVector& u_ti) = 0;
+                state::StateVector<T>& x_tf,
+                state::StateVector<T>& x_ti,
+                state::ControlVector<T>& u_tf,
+                state::ControlVector<T>& u_ti) = 0;
 
             virtual double probability(
-                double a, double b) = 0;
+                T a, T b) = 0;
 
             double distance(
-                double x_f, double x_i,
-                double y_f, double y_i);
+                T x_f, T x_i,
+                T y_f, T y_i)
+            {
+                return std::sqrt(std::pow(x_f-x_i,2)+std::pow(y_f-y_i,2));
+            }
 
             double variance(
-                double a1, double d1,
-                double a2, double d2);
+                T a1, T d1,
+                T a2, T d2)
+            {
+                return
+                    a1*std::pow(d1,2)+
+                    a2*std::pow(d2,2);
+            }
 
             double variance(
-                double a1, double d1,
-                double a2, double d2,
-                double d3);
+                T a1, T d1,
+                T a2, T d2,
+                T d3)
+            {
+                return
+                    a1*std::pow(d1,2)+
+                    a2*std::pow(d2,2)+
+                    a2*std::pow(d3,2);
+            }
 
 
         private:
@@ -41,35 +75,99 @@ namespace model {
     };
 
 
-    class OdometryMotionModel : public MotionModel {
+    template<class T>
+    class OdometryMotionModel : public MotionModel<T> {
 
         public:
-            OdometryMotionModel();
-            ~OdometryMotionModel();
+            OdometryMotionModel() :
+                MotionModel<T>(),
+                delta_i_(state::ParameterVector<T>(0)),
+                delta_f_(state::ParameterVector<T>(0))
+            {
+                int def_vars = 3;
+                this->delta_i_.init(def_vars);
+                this->delta_f_.init(def_vars);
+            }
+
+            ~OdometryMotionModel() {
+
+            }
 
             virtual double calculate(
-                state::StateVector& x_tf,
-                state::StateVector& x_ti,
-                state::ControlVector& u_tf,
-                state::ControlVector& u_ti);
+                state::StateVector<T>& x_tf,
+                state::StateVector<T>& x_ti,
+                state::ControlVector<T>& u_tf,
+                state::ControlVector<T>& u_ti)
+            {
+                this->delta_i_[MOTION::ROT_1] = this->init_rotation(u_tf,u_ti);
+                this->delta_i_[MOTION::TRANS] = this->translation(u_tf,u_ti);
+                this->delta_i_[MOTION::ROT_2] = this->final_rotation(
+                    u_tf,u_ti,this->delta_i_[MOTION::ROT_1]);
+
+                this->delta_f_[MOTION::ROT_1] = this->init_rotation(x_tf,x_ti);
+                this->delta_f_[MOTION::TRANS] = this->translation(x_tf,x_ti);
+                this->delta_f_[MOTION::ROT_2] = this->final_rotation(
+                    x_tf,x_ti,this->delta_f_[MOTION::ROT_1]);
+
+                double p1 = this->probability(
+                    this->delta_i_[MOTION::ROT_1]-this->delta_f_[MOTION::ROT_1],
+                    this->variance(
+                        alpha_1,this->delta_f_[MOTION::ROT_1],
+                        alpha_2,this->delta_f_[MOTION::TRANS]));
+
+                double p2 = this->probability(
+                    this->delta_i_[MOTION::TRANS]-this->delta_f_[MOTION::TRANS],
+                    this->variance(
+                        alpha_3,this->delta_f_[MOTION::TRANS],
+                        alpha_4,this->delta_f_[MOTION::ROT_1],
+                        this->delta_f_[MOTION::ROT_2]));
+
+                double p3 = this->probability(
+                    this->delta_i_[MOTION::ROT_2]-this->delta_f_[MOTION::ROT_2],
+                    this->variance(
+                        alpha_1,this->delta_f_[MOTION::ROT_2],
+                        alpha_2,this->delta_f_[MOTION::TRANS]));
+
+                return p1*p2*p3;
+
+            }
 
 
         private:
             double init_rotation(
-                state::StateVector& x_tf,
-                state::StateVector& x_ti);
+                state::StateVector<T>& x_tf,
+                state::StateVector<T>& x_ti)
+            {
+                double y = x_tf[POSE::Y] - x_ti[POSE::Y];
+                double x = x_tf[POSE::X] - x_ti[POSE::X];
+                double theta = x_ti[POSE::A];
+                return atan2(y,x) - theta;
+            }
 
             double translation(
-                state::StateVector& x_tf,
-                state::StateVector& x_ti);
+                state::StateVector<T>& x_tf,
+                state::StateVector<T>& x_ti)
+            {
+                return this->distance(
+                    x_tf[POSE::X],x_ti[POSE::X],
+                    x_tf[POSE::Y],x_ti[POSE::Y]);
+            }
 
             double final_rotation(
-                state::StateVector& x_tf,
-                state::StateVector& x_ti,
-                double rotation_1);
+                state::StateVector<T>& x_tf,
+                state::StateVector<T>& x_ti,
+                T rotation_1)
+            {
+                return x_tf[POSE::A] - x_ti[POSE::A] - rotation_1;
+            }
 
             virtual double probability(
-                double a, double b);
+                T a, T b)
+            {
+                double norm = 1.0/std::sqrt(2*M_PI*b);
+                double expon = std::exp(-std::pow(a,2)/(2*b));
+                return norm*expon;
+            }
 
             enum MOTION {
                 ROT_1 = 0,
@@ -80,11 +178,11 @@ namespace model {
             enum POSE {
                 X = 0,
                 Y = 1,
-                T = 2
+                A = 2
             };
 
-            state::ParameterVector delta_i_;
-            state::ParameterVector delta_f_;
+            state::ParameterVector<T> delta_i_;
+            state::ParameterVector<T> delta_f_;
 
     };
 
@@ -92,5 +190,4 @@ namespace model {
 
 
 #endif // MOTION_MODEL_H_
-
 
