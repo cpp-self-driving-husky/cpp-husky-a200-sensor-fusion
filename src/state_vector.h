@@ -1,6 +1,7 @@
 #ifndef STATE_VECTOR_H_
 #define STATE_VECTOR_H_
 #include <cmath>
+#include <iostream>
 
 
 namespace state {

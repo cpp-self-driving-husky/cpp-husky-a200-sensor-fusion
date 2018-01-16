@@ -1,16 +1,27 @@
 #include <iostream>
-//#include "covariance_matrix.h"
-#include "../test/test.h"
+#include "unscented_kalman_filter.h"
 
 
 int main(int argc, char* argv[]) {
 
-	test::Test test;
-	//test.testMatrixA();
-	//test.testMatrixB();
-	//test.testMotionModelA();
-	//test.testMatrixTranspose();
-	test.testAddVectorMatrix();
+    int state_size = 3;
+    int data_size = 10;
+    model::MotionModel<double>* motion_model =
+        new model::OdometryMotionModel<double>();
+    ukf::UnscentedKalmanFilter filter(state_size,data_size);
+    filter.setMotionModel(motion_model);
+
+    state::StateVector<double> state_vector(state_size);
+    mtx::CovarianceMatrix<double> covariance_matrix(state_size,state_size);
+    state::ControlVector<double> control_vector(state_size);
+    state::MeasurementVector<double> measurement_vector(state_size);
+
+    filter.update(
+        state_vector,
+        covariance_matrix,
+        control_vector,
+        measurement_vector);
 
 	return 0;
 }
+

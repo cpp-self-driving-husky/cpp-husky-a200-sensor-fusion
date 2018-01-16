@@ -68,7 +68,6 @@ namespace model {
                     a2*std::pow(d3,2);
             }
 
-
         private:
 
     };
@@ -80,13 +79,9 @@ namespace model {
         public:
             OdometryMotionModel() :
                 MotionModel<T>(),
-                delta_i_(state::ParameterVector<T>(0)),
-                delta_f_(state::ParameterVector<T>(0))
-            {
-                int def_vars = 3;
-                this->delta_i_.init(def_vars);
-                this->delta_f_.init(def_vars);
-            }
+                delta_i_(state::ParameterVector<T>(this->params_)),
+                delta_f_(state::ParameterVector<T>(this->params_))
+            {}
 
             ~OdometryMotionModel() {
 
@@ -179,8 +174,48 @@ namespace model {
                 A = 2
             };
 
+        private:
             state::ParameterVector<T> delta_i_;
             state::ParameterVector<T> delta_f_;
+            const int params_ = 3;
+
+    };
+
+    // a linear motion model created just for testing purposes
+    // not to be used in actual implementation
+    template<class T>
+    class SimpleMotionModel : public MotionModel<T> {
+
+        public:
+            SimpleMotionModel() :
+                MotionModel<T>()
+            {}
+
+            ~SimpleMotionModel() {
+
+            }
+
+            virtual double calculate(
+                state::StateVector<T>& x_tf,
+                state::StateVector<T>& x_ti,
+                state::ControlVector<T>& u_tf,
+                state::ControlVector<T>& u_ti)
+            {
+                // motion model created just for testing purposes
+                // assumes state and control vector same dimension
+                int vars = x_ti.getVars();
+                for (int i = 0; i < vars; ++i)
+                    x_tf[i] = x_ti[i] + u_tf[i];
+                return 1.0;
+            }
+
+            virtual double probability(
+                T a, T b)
+            {
+                return 1.0;
+            }
+
+        private:
 
     };
 
