@@ -32,24 +32,41 @@ namespace ukf {
                 state::StateVector<double>& state,
                 mtx::Matrix<double>& covariance);
 
+            void priorFunction(
+                sigma::SigmaPoints<double>& prior,
+                state::StateVector<double>& control,
+                sigma::SigmaPoints<double>& sigma);
+
+            void sumWeighedState(
+                state::StateVector<double>& state,
+                sigma::SigmaPoints<double>& sigma,
+                state::WeightVector<double>& weights);
+
+
             void update(
                 state::StateVector<double>& state_vector,
                 mtx::CovarianceMatrix<double>& covariance_matrix,
                 state::ControlVector<double>& control_vector,
                 state::MeasurementVector<double>& measurement_vector);
 
-            //void updateLocality();
 
         private:
-            state::StateVector<double> state_;
-            mtx::CovarianceMatrix<double> covariance_;
-            sigma::SigmaPoints<double> sigma_;
-            state::WeightVector<double> weights_;
+            //state::StateVector<double> state_;
+            state::StateVector<double> state_belief_;
 
-            //mtx::DataMatrix<double> data_matrix_;
+            mtx::CovarianceMatrix<double> covariance_;
             mtx::Matrix<double> cholesky_matrix_;
 
+            sigma::SigmaPoints<double> sigma_;
+            sigma::SigmaPoints<double> sigma_prev_;
+            sigma::SigmaPoints<double> sigma_prior_;
+
+            state::WeightVector<double> mean_weights_;
+            state::WeightVector<double> covariance_weights_;
+
             model::MotionModel<double>* motion_model_;
+
+            state::StateVector<double> blank_;
 
             int state_size_;
             double lambda_;

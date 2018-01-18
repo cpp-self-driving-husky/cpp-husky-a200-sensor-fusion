@@ -33,6 +33,11 @@ namespace state {
                     this->vec_[i] = 0.0;
             }
 
+            void zero() {
+                for (int i = 0; i < this->vars_; ++i)
+                    this->vec_[i] = 0.0;
+            }
+
             void replicate(StateVector& state) {
                 for (int i = 0; i < this->vars_; ++i)
                     state[i] = this->vec_[i];

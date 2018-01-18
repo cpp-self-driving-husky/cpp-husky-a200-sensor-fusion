@@ -31,7 +31,6 @@ namespace model {
 
             }
 
-        protected:
             virtual double calculate(
                 state::StateVector<T>& x_tf,
                 state::StateVector<T>& x_ti,
@@ -41,6 +40,7 @@ namespace model {
             virtual double probability(
                 T a, T b) = 0;
 
+        protected:
             double distance(
                 T x_f, T x_i,
                 T y_f, T y_i)

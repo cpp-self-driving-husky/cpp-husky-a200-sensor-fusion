@@ -6,8 +6,13 @@ int main(int argc, char* argv[]) {
 
     int state_size = 3;
     int data_size = 10;
+
+    //model::MotionModel<double>* motion_model =
+    //    new model::OdometryMotionModel<double>();
+
     model::MotionModel<double>* motion_model =
-        new model::OdometryMotionModel<double>();
+        new model::SimpleMotionModel<double>();
+
     ukf::UnscentedKalmanFilter filter(state_size,data_size);
     filter.setMotionModel(motion_model);
 

@@ -59,6 +59,17 @@ namespace sigma {
                     cholesky_matrix.subVectorMatrixRow(this->points_[n],n-offset);
             }
 
+            void sumWeighedState(
+                state::StateVector<T>& state,
+                state::WeightVector<T>& weights)
+            {
+                state.zero();
+                int state_size = state.getVars();
+                for (int i = 0; i < this->elements_; ++i)
+                    for (int j = 0; j < state_size; ++j)
+                        state[j] += this->points_[i][j] * weights[i];
+            }
+
             T calculateLambda(double alpha, double kappa) {
                 return this->points_[0].calculateLambda(alpha,kappa);
             }
