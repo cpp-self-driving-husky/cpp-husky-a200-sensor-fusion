@@ -36,6 +36,12 @@ namespace mtx {
                     matrix[i] = this->matrix_[i];
             }
 
+            void zero() {
+                int elems = this->rows_*this->cols_;
+                for (int i = 0; i < elems; ++i)
+                    this->matrix_[i] = 0.0;
+            }
+
             void destroy() {
                 if (this->matrix_ != nullptr) {
                     delete[] this->matrix_;
@@ -50,6 +56,13 @@ namespace mtx {
 
             T& operator[](int i) {
                 return this->matrix_[i];
+            }
+
+            // TODO test this!
+            void operator+=(mtx::Matrix<T>& matrix) {
+                int elems = this->rows_*this->cols_;
+                for (int i = 0; i < elems; ++i)
+                    this->matrix_[i] += matrix.matrix_[i];
             }
 
             void stateCol(

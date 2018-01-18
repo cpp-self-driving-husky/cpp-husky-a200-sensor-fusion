@@ -42,6 +42,13 @@ namespace ukf {
                 sigma::SigmaPoints<double>& sigma,
                 state::WeightVector<double>& weights);
 
+            void sumWeighedCovariance(
+                mtx::Matrix<double>& covariance,
+                state::WeightVector<double>& weight,
+                sigma::SigmaPoints<double>& sigma,
+                state::StateVector<double>& belief,
+                mtx::Matrix<double>& noise);
+
 
             void update(
                 state::StateVector<double>& state_vector,

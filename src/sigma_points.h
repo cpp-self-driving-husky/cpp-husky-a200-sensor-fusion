@@ -59,6 +59,7 @@ namespace sigma {
                     cholesky_matrix.subVectorMatrixRow(this->points_[n],n-offset);
             }
 
+            // TODO test this!
             void sumWeighedState(
                 state::StateVector<T>& state,
                 state::WeightVector<T>& weights)

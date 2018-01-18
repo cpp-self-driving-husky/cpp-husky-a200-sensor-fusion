@@ -116,6 +116,17 @@ void ukf::UnscentedKalmanFilter::sumWeighedState(
 }
 
 
+void ukf::UnscentedKalmanFilter::sumWeighedCovariance(
+    mtx::Matrix<double>& covariance,
+    state::WeightVector<double>& weight,
+    sigma::SigmaPoints<double>& sigma,
+    state::StateVector<double>& belief,
+    mtx::Matrix<double>& noise)
+{
+
+}
+
+
 
 void ukf::UnscentedKalmanFilter::update(
     state::StateVector<double>& state_vector,
@@ -123,6 +134,7 @@ void ukf::UnscentedKalmanFilter::update(
     state::ControlVector<double>& control_vector,
     state::MeasurementVector<double>& measurement_vector)
 {
+
     this->calculateSigmaPoints(this->sigma_,state_vector,covariance_matrix);
     this->priorFunction(this->sigma_prev_,control_vector,this->sigma_);
     this->sumWeighedState(this->state_belief_,this->sigma_prev_,this->mean_weights_);
