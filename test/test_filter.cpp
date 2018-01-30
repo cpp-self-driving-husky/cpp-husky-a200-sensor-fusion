@@ -64,10 +64,33 @@ void testFilterA() {
 
 
 
+void testMatrixTimesTranspose() {
+
+    int rows = 3, cols = 5;
+
+    mtx::Matrix<double> product(rows,rows);
+    mtx::Matrix<double> matrix(rows,cols);
+
+    for (int i = 0; i < rows*cols; ++i)
+        matrix[i] = i*cols % 9;
+
+    matrix.print();
+
+    ukf::UnscentedKalmanFilter filter(rows,cols);
+    filter.matrixTimesTranspose(product,matrix);
+
+    //matrix.print();
+    product.print();
+
+}
+
+
+
 
 
 int main(int argc, char* argv[]) {
-    testFilterA();
+    //testFilterA();
+    testMatrixTimesTranspose();
     return 0;
 }
 

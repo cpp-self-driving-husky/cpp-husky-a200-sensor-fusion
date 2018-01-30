@@ -27,6 +27,10 @@ namespace ukf {
             double calculateGamma(double lambda, int n);
             int pointsPerState(int state_size);
 
+            void matrixTimesTranspose(
+                mtx::Matrix<double>& product,
+                mtx::Matrix<double>& matrix);
+
             void calculateSigmaPoints(
                 sigma::SigmaPoints<double>& sigma,
                 state::StateVector<double>& state,
@@ -49,7 +53,6 @@ namespace ukf {
                 state::StateVector<double>& belief,
                 mtx::Matrix<double>& noise);
 
-
             void update(
                 state::StateVector<double>& state_vector,
                 mtx::CovarianceMatrix<double>& covariance_matrix,
@@ -62,9 +65,14 @@ namespace ukf {
             state::StateVector<double> state_belief_;
 
             mtx::CovarianceMatrix<double> covariance_;
+            mtx::CovarianceMatrix<double> covariance_belief_;
+
             mtx::Matrix<double> cholesky_matrix_;
             mtx::Matrix<double> noise_r_;
+
+            // rename this
             mtx::Matrix<double> holder_;
+            mtx::Matrix<double> matrix_transpose_;
 
             sigma::SigmaPoints<double> sigma_;
             sigma::SigmaPoints<double> sigma_prev_;

@@ -17,9 +17,11 @@ ukf::UnscentedKalmanFilter::UnscentedKalmanFilter(int n, int samples) :
     state_belief_(state::StateVector<double>(n)),
 
     covariance_(mtx::CovarianceMatrix<double>(n,n)),
+    covariance_belief_(mtx::CovarianceMatrix<double>(n,n)),
+
     cholesky_matrix_(mtx::Matrix<double>(n,n)),
     holder_(mtx::Matrix<double>(n,this->pointsPerState(n))),
-
+    matrix_transpose_(mtx::Matrix<double>(n,n)),
     noise_r_(mtx::Matrix<double>(n,n)),
 
     sigma_(sigma::SigmaPoints<double>(n)),
@@ -116,20 +118,79 @@ void ukf::UnscentedKalmanFilter::sumWeighedState(
     sigma::SigmaPoints<double>& sigma,
     state::WeightVector<double>& weights)
 {
-    //sigma.sumWeighedState(state,weights);
-
     int vars = state.getVars();
     int points = sigma.getSize();
     for (int i = 0; i < points; ++i) {
-        //state::StateVector<double> point = sigma[i];
         for (int j = 0; j < vars; ++j) {
             state[j] = sigma[i][j] * weights[j];
         }
     }
+}
 
-    state.print();
+
+/*
+// perhaps redo this, could be inefficient
+void ukf::UnscentedKalmanFilter::matrixTimesTranspose(
+    mtx::Matrix<double>& product,
+    mtx::Matrix<double>& matrix)
+{
+    int n = matrix.getRows();
+    int m = matrix.getCols();
+    for (int i = 0; i < n; ++i) {
+        for (int k = 0; k < m; ++k) {
+            for (int j = 0; j < n; ++j) {
+                product[i*m+j] += matrix[i*m+k] * matrix[j*m+k];
+            }
+        }
+    }
+}
+*/
+
+/*
+// perhaps redo this, could be inefficient
+void ukf::UnscentedKalmanFilter::matrixTimesTranspose(
+    mtx::Matrix<double>& product,
+    mtx::Matrix<double>& matrix)
+{
+
+    product.zero();
+    int pi = product.getRows();
+    int pj = product.getCols();
+    int ki = matrix.getRows();
+    int kj = matrix.getCols();
+
+    for (int i = 0; i < pi; ++i) {
+        for (int j = i; j < pj; ++j) {
+            for (int k = 0; k < ki; ++k) {
+                product[i*pj+j] += matrix[i*ki+k] * matrix[j*kj+k];
+            }
+        }
+    }
+
+    //std::cout << pi << " " << pj << " " << ki << " " << kj << std::endl;
 
 }
+*/
+
+
+
+// perhaps redo this, could be inefficient
+void ukf::UnscentedKalmanFilter::matrixTimesTranspose(
+    mtx::Matrix<double>& product,
+    mtx::Matrix<double>& matrix)
+{
+    product.zero();
+    int n = matrix.getRows();
+    int m = matrix.getCols();
+    for (int i = 0; i < n; ++i)
+        for (int k = 0; k < m; ++k)
+            for (int j = i; j < n; ++j)
+                product[i*n+j] += matrix[i*m+k] * matrix[j*m+k];
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            product[j*n+i] = product[i*n+j];
+}
+
 
 
 void ukf::UnscentedKalmanFilter::sumWeighedCovariance(
@@ -141,15 +202,20 @@ void ukf::UnscentedKalmanFilter::sumWeighedCovariance(
 {
     covariance.zero();
     int vars = sigma.getStateSize();
-    int elements = sigma.getSize();
-    for (int i = 0; i < elements; ++i)
+    int points = sigma.getSize();
+    for (int i = 0; i < points; ++i)
         for (int j = 0; j < vars; ++j)
             this->holder_[i*vars+j] = sigma[i][j] - belief[j];
 
+    for (int i = 0; i < points; ++i)
+        for (int j = 0; j < vars; ++j)
+            this->holder_[i*vars+j] *= weight[i];
 
-    //belief.print();
+    this->matrixTimesTranspose(
+        covariance,
+        this->holder_);
 
-    //this->holder_.print();
+    covariance += noise;
 
 }
 
@@ -164,15 +230,15 @@ void ukf::UnscentedKalmanFilter::update(
 
     this->calculateSigmaPoints(this->sigma_,state_vector,covariance_matrix);
 
-    this->sigma_.print();
-
     this->priorFunction(this->sigma_prev_,control_vector,this->sigma_);
     this->sumWeighedState(this->state_belief_,this->sigma_prev_,this->mean_weights_);
 
 
+
     this->sumWeighedCovariance(
-        covariance_matrix,this->covariance_weights_,
+        this->covariance_belief_,this->covariance_weights_,
         this->sigma_prev_,this->state_belief_,this->noise_r_);
+
 
 
 
