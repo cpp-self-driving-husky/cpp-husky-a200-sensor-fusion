@@ -76,6 +76,15 @@ namespace state {
                 return this->vars_;
             }
 
+
+            void print() {
+                for (int i = 0; i < this->vars_; ++i)
+                    std::cout << this->vec_[i] << " ";
+                std::cout << "\n" <<
+                    "variables " << this->vars_ << "\n\n";
+            }
+
+
         protected:
             T* vec_;
             int vars_;

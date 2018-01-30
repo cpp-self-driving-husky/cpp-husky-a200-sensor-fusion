@@ -18,6 +18,9 @@ ukf::UnscentedKalmanFilter::UnscentedKalmanFilter(int n, int samples) :
 
     covariance_(mtx::CovarianceMatrix<double>(n,n)),
     cholesky_matrix_(mtx::Matrix<double>(n,n)),
+    holder_(mtx::Matrix<double>(n,this->pointsPerState(n))),
+
+    noise_r_(mtx::Matrix<double>(n,n)),
 
     sigma_(sigma::SigmaPoints<double>(n)),
     sigma_prev_(sigma::SigmaPoints<double>(n)),
@@ -25,7 +28,6 @@ ukf::UnscentedKalmanFilter::UnscentedKalmanFilter(int n, int samples) :
 
     mean_weights_(state::WeightVector<double>(n)),
     covariance_weights_(state::WeightVector<double>(n)),
-
     blank_(state::StateVector<double>(n)),
 
     state_size_(n),
@@ -47,6 +49,8 @@ void ukf::UnscentedKalmanFilter::init(int n) {
 
     this->mean_weights_.populateMean(ALPHA,KAPPA);
     this->covariance_weights_.populateCovariance(ALPHA,KAPPA,BETA);
+
+    this->state_size_;
 
 }
 
@@ -112,7 +116,19 @@ void ukf::UnscentedKalmanFilter::sumWeighedState(
     sigma::SigmaPoints<double>& sigma,
     state::WeightVector<double>& weights)
 {
-    sigma.sumWeighedState(state,weights);
+    //sigma.sumWeighedState(state,weights);
+
+    int vars = state.getVars();
+    int points = sigma.getSize();
+    for (int i = 0; i < points; ++i) {
+        //state::StateVector<double> point = sigma[i];
+        for (int j = 0; j < vars; ++j) {
+            state[j] = sigma[i][j] * weights[j];
+        }
+    }
+
+    state.print();
+
 }
 
 
@@ -123,6 +139,17 @@ void ukf::UnscentedKalmanFilter::sumWeighedCovariance(
     state::StateVector<double>& belief,
     mtx::Matrix<double>& noise)
 {
+    covariance.zero();
+    int vars = sigma.getStateSize();
+    int elements = sigma.getSize();
+    for (int i = 0; i < elements; ++i)
+        for (int j = 0; j < vars; ++j)
+            this->holder_[i*vars+j] = sigma[i][j] - belief[j];
+
+
+    //belief.print();
+
+    //this->holder_.print();
 
 }
 
@@ -136,8 +163,18 @@ void ukf::UnscentedKalmanFilter::update(
 {
 
     this->calculateSigmaPoints(this->sigma_,state_vector,covariance_matrix);
+
+    this->sigma_.print();
+
     this->priorFunction(this->sigma_prev_,control_vector,this->sigma_);
     this->sumWeighedState(this->state_belief_,this->sigma_prev_,this->mean_weights_);
+
+
+    this->sumWeighedCovariance(
+        covariance_matrix,this->covariance_weights_,
+        this->sigma_prev_,this->state_belief_,this->noise_r_);
+
+
 
 }
 

@@ -63,6 +63,8 @@ namespace ukf {
 
             mtx::CovarianceMatrix<double> covariance_;
             mtx::Matrix<double> cholesky_matrix_;
+            mtx::Matrix<double> noise_r_;
+            mtx::Matrix<double> holder_;
 
             sigma::SigmaPoints<double> sigma_;
             sigma::SigmaPoints<double> sigma_prev_;

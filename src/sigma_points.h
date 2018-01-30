@@ -4,6 +4,11 @@
 #include "matrix.h"
 
 
+// include for testing
+#include<iostream>
+
+
+
 namespace sigma {
 
     template<class T>
@@ -59,6 +64,7 @@ namespace sigma {
                     cholesky_matrix.subVectorMatrixRow(this->points_[n],n-offset);
             }
 
+            /*
             // TODO test this!
             void sumWeighedState(
                 state::StateVector<T>& state,
@@ -70,6 +76,7 @@ namespace sigma {
                     for (int j = 0; j < state_size; ++j)
                         state[j] += this->points_[i][j] * weights[i];
             }
+            */
 
             T calculateLambda(double alpha, double kappa) {
                 return this->points_[0].calculateLambda(alpha,kappa);
@@ -90,6 +97,26 @@ namespace sigma {
             int getSize() {
                 return this->elements_;
             }
+
+            int getStateSize() {
+                return this->state_size_;
+            }
+
+
+            void print() {
+                int num_points = this->elements_;
+                int vars = this->state_size_;
+                for (int n = 0; n < num_points; ++n) {
+                    std::cout << n+1 << ": ";
+                    for (int i = 0; i < vars; ++i) {
+                        std::cout << this->points_[n][i] << " ";
+                    }
+                    std::cout << "\n";
+                }
+                std::cout << "size " << num_points << "\n";
+                std::cout << std::endl;
+            }
+
 
         private:
             state::StateVector<T>* points_;

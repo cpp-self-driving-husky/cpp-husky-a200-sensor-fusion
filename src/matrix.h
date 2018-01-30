@@ -3,6 +3,9 @@
 #include <cmath>
 #include "state_vector.h"
 
+// test for printing
+#include<iostream>
+
 
 namespace mtx {
 
@@ -211,6 +214,21 @@ namespace mtx {
                 return this->rows_ * this->cols_;
             }
 
+            // test function
+            void print() {
+                for (int r = 0; r < this->rows_; ++r) {
+                    for (int c = 0; c < this->cols_; ++c) {
+                        std::cout << this->matrix_[r*this->cols_+c] << " ";
+                    }
+                    std::cout << "\n";
+                }
+                std::cout <<
+                    "rows: " << this->rows_ << ", " <<
+                    "cols: " << this->cols_ << "\n";
+                std::cout << std::endl;
+            }
+
+
         private:
             T* matrix_;
             int rows_;
@@ -218,6 +236,8 @@ namespace mtx {
 
     };
 
+    // a data matrix places observations as rows,
+    // and each variable is in columns
     template<class T>
     using DataMatrix = Matrix<T>;
 
