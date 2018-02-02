@@ -4,6 +4,7 @@
 #include "matrix.h"
 #include "sigma_points.h"
 #include "motion_model.h"
+#include "sensor_model.h"
 
 
 namespace ukf {
@@ -15,13 +16,14 @@ namespace ukf {
     class UnscentedKalmanFilter {
 
         public:
-            UnscentedKalmanFilter(int state_size, int samples);
+            UnscentedKalmanFilter(int state_size);
             ~UnscentedKalmanFilter();
 
             void init(int state_size);
             void destroy();
 
             void setMotionModel(model::MotionModel<double>* model);
+            void setSensorModel(sensor::SensorModel<double>* sensor);
 
             double calculateLambda(double alpha, double kappa, int n);
             double calculateGamma(double lambda, int n);
@@ -53,6 +55,8 @@ namespace ukf {
                 state::StateVector<double>& belief,
                 mtx::Matrix<double>& noise);
 
+            void predictionFunction(sigma::SigmaPoints<double>& sigma);
+
             void update(
                 state::StateVector<double>& state_vector,
                 mtx::CovarianceMatrix<double>& covariance_matrix,
@@ -61,8 +65,9 @@ namespace ukf {
 
 
         private:
-            //state::StateVector<double> state_;
             state::StateVector<double> state_belief_;
+
+            state::StateVector<double> blank_;
 
             mtx::CovarianceMatrix<double> covariance_;
             mtx::CovarianceMatrix<double> covariance_belief_;
@@ -77,13 +82,16 @@ namespace ukf {
             sigma::SigmaPoints<double> sigma_;
             sigma::SigmaPoints<double> sigma_prev_;
             sigma::SigmaPoints<double> sigma_prior_;
+            sigma::SigmaPoints<double> sigma_uncertainty_;
+
+
 
             state::WeightVector<double> mean_weights_;
             state::WeightVector<double> covariance_weights_;
 
             model::MotionModel<double>* motion_model_;
+            sensor::SensorModel<double>* sensor_model_;
 
-            state::StateVector<double> blank_;
 
             int state_size_;
             double lambda_;

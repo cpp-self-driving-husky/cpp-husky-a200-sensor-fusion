@@ -12,7 +12,7 @@ namespace {
 }
 
 
-ukf::UnscentedKalmanFilter::UnscentedKalmanFilter(int n, int samples) :
+ukf::UnscentedKalmanFilter::UnscentedKalmanFilter(int n) :
 
     state_belief_(state::StateVector<double>(n)),
 
@@ -27,13 +27,20 @@ ukf::UnscentedKalmanFilter::UnscentedKalmanFilter(int n, int samples) :
     sigma_(sigma::SigmaPoints<double>(n)),
     sigma_prev_(sigma::SigmaPoints<double>(n)),
     sigma_prior_(sigma::SigmaPoints<double>(n)),
+    sigma_uncertainty_(sigma::SigmaPoints<double>(n)),
 
     mean_weights_(state::WeightVector<double>(n)),
     covariance_weights_(state::WeightVector<double>(n)),
     blank_(state::StateVector<double>(n)),
 
     state_size_(n),
-    motion_model_(nullptr)
+    motion_model_(nullptr),
+    sensor_model_(nullptr),
+
+    lambda_(this->calculateLambda(ALPHA,KAPPA,n)),
+    gamma_(this->calculateGamma(this->lambda_,n))
+
+
 {
     this->init(n);
 }
@@ -46,13 +53,13 @@ ukf::UnscentedKalmanFilter::~UnscentedKalmanFilter() {
 
 void ukf::UnscentedKalmanFilter::init(int n) {
 
-    this->lambda_ = this->calculateLambda(ALPHA,KAPPA,n);
-    this->gamma_ = this->calculateGamma(this->lambda_,n);
+    //this->lambda_ = this->calculateLambda(ALPHA,KAPPA,n);
+    //this->gamma_ = this->calculateGamma(this->lambda_,n);
 
     this->mean_weights_.populateMean(ALPHA,KAPPA);
     this->covariance_weights_.populateCovariance(ALPHA,KAPPA,BETA);
 
-    this->state_size_;
+    //this->state_size_;
 
 }
 
@@ -62,6 +69,10 @@ void ukf::UnscentedKalmanFilter::destroy() {
         delete this->motion_model_;
         this->motion_model_ = nullptr;
     }
+    if (this->sensor_model_ != nullptr) {
+        delete this->sensor_model_;
+        this->sensor_model_ = nullptr;
+    }
 }
 
 
@@ -69,6 +80,13 @@ void ukf::UnscentedKalmanFilter::setMotionModel(
     model::MotionModel<double>* model)
 {
     this->motion_model_ = model;
+}
+
+
+void ukf::UnscentedKalmanFilter::setSensorModel(
+    sensor::SensorModel<double>* sensor)
+{
+    this->sensor_model_ = sensor;
 }
 
 
@@ -128,52 +146,6 @@ void ukf::UnscentedKalmanFilter::sumWeighedState(
 }
 
 
-/*
-// perhaps redo this, could be inefficient
-void ukf::UnscentedKalmanFilter::matrixTimesTranspose(
-    mtx::Matrix<double>& product,
-    mtx::Matrix<double>& matrix)
-{
-    int n = matrix.getRows();
-    int m = matrix.getCols();
-    for (int i = 0; i < n; ++i) {
-        for (int k = 0; k < m; ++k) {
-            for (int j = 0; j < n; ++j) {
-                product[i*m+j] += matrix[i*m+k] * matrix[j*m+k];
-            }
-        }
-    }
-}
-*/
-
-/*
-// perhaps redo this, could be inefficient
-void ukf::UnscentedKalmanFilter::matrixTimesTranspose(
-    mtx::Matrix<double>& product,
-    mtx::Matrix<double>& matrix)
-{
-
-    product.zero();
-    int pi = product.getRows();
-    int pj = product.getCols();
-    int ki = matrix.getRows();
-    int kj = matrix.getCols();
-
-    for (int i = 0; i < pi; ++i) {
-        for (int j = i; j < pj; ++j) {
-            for (int k = 0; k < ki; ++k) {
-                product[i*pj+j] += matrix[i*ki+k] * matrix[j*kj+k];
-            }
-        }
-    }
-
-    //std::cout << pi << " " << pj << " " << ki << " " << kj << std::endl;
-
-}
-*/
-
-
-
 // perhaps redo this, could be inefficient
 void ukf::UnscentedKalmanFilter::matrixTimesTranspose(
     mtx::Matrix<double>& product,
@@ -220,6 +192,18 @@ void ukf::UnscentedKalmanFilter::sumWeighedCovariance(
 }
 
 
+void ukf::UnscentedKalmanFilter::predictionFunction(
+    sigma::SigmaPoints<double>& sigma)
+{
+    int points = sigma.getSize();
+    for (int i = 0; i < points; ++i)
+        this->sensor_model_->calculate(sigma);
+}
+
+
+
+
+
 
 void ukf::UnscentedKalmanFilter::update(
     state::StateVector<double>& state_vector,
@@ -229,26 +213,21 @@ void ukf::UnscentedKalmanFilter::update(
 {
 
     this->calculateSigmaPoints(this->sigma_,state_vector,covariance_matrix);
-
     this->priorFunction(this->sigma_prev_,control_vector,this->sigma_);
     this->sumWeighedState(this->state_belief_,this->sigma_prev_,this->mean_weights_);
-
-
-
     this->sumWeighedCovariance(
         this->covariance_belief_,this->covariance_weights_,
         this->sigma_prev_,this->state_belief_,this->noise_r_);
+    this->calculateSigmaPoints(
+        this->sigma_uncertainty_,this->state_belief_,
+        this->covariance_belief_);
+    this->predictionFunction(this->sigma_uncertainty_);
+
 
 
 
 
 }
-
-
-
-
-
-
 
 
 

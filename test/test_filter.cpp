@@ -25,12 +25,15 @@ void testFilterA() {
         data_matrix[i] = data_sample[i];
 
     // init motion model
-    model::MotionModel<double>* motion_model
-        = new model::SimpleMotionModel<double>();
+    model::MotionModel<double>* motion_model =
+        new model::SimpleMotionModel<double>();
+    sensor::SensorModel<double>* sensor_model =
+        new sensor::SimpleSensorModel<double>();
 
     // init unscented kalman filter
-    ukf::UnscentedKalmanFilter filter(state_size,data_size);
+    ukf::UnscentedKalmanFilter filter(state_size);
     filter.setMotionModel(motion_model);
+    filter.setSensorModel(sensor_model);
 
     // init state vector and covariance matrix
     state::StateVector<double> state(state_size);
@@ -49,22 +52,13 @@ void testFilterA() {
 
 
 
-
-
-
-    // one iteration of kalman filter
-    //filter.update(
-    //    state_vector,
-    //    covariance_matrix,
-    //    control_vector,
-    //    measurement_vector);
-
-
 }
 
 
 
 void testMatrixTimesTranspose() {
+
+    /*
 
     int rows = 3, cols = 5;
 
@@ -82,6 +76,8 @@ void testMatrixTimesTranspose() {
     //matrix.print();
     product.print();
 
+    */
+
 }
 
 
@@ -89,8 +85,8 @@ void testMatrixTimesTranspose() {
 
 
 int main(int argc, char* argv[]) {
-    //testFilterA();
-    testMatrixTimesTranspose();
+    testFilterA();
+    //testMatrixTimesTranspose();
     return 0;
 }
 

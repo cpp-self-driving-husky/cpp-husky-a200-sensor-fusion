@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     model::MotionModel<double>* motion_model =
         new model::SimpleMotionModel<double>();
 
-    ukf::UnscentedKalmanFilter filter(state_size,data_size);
+    ukf::UnscentedKalmanFilter filter(state_size);
     filter.setMotionModel(motion_model);
 
     state::StateVector<double> state_vector(state_size);

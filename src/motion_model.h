@@ -203,9 +203,9 @@ namespace model {
             {
                 // motion model created just for testing purposes
                 // assumes state and control vector same dimension
-                int vars = x_ti.getVars();
-                for (int i = 0; i < vars; ++i)
-                    x_tf[i] = x_ti[i] + u_tf[i];
+                //int vars = x_ti.getVars();
+                //for (int i = 0; i < vars; ++i)
+                //    x_tf[i] = x_ti[i] + u_tf[i];
                 return 1.0;
             }
 
