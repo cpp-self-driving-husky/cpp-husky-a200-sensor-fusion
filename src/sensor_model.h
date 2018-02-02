@@ -15,7 +15,9 @@ namespace sensor {
 
             }
 
-            virtual void calculate(sigma::SigmaPoints<T>& sigma) = 0;
+            virtual void calculate(
+                sigma::SigmaPoints<T>& observation,
+                sigma::SigmaPoints<T>& prediction) = 0;
 
 
         private:
@@ -35,9 +37,10 @@ namespace sensor {
 
             }
 
-            virtual void calculate(sigma::SigmaPoints<T>& sigma) {
-
-
+            virtual void calculate(
+                sigma::SigmaPoints<T>& observation,
+                sigma::SigmaPoints<T>& prediction)
+            {
 
             }
 

@@ -55,7 +55,9 @@ namespace ukf {
                 state::StateVector<double>& belief,
                 mtx::Matrix<double>& noise);
 
-            void predictionFunction(sigma::SigmaPoints<double>& sigma);
+            void predictionFunction(
+                sigma::SigmaPoints<double>& observation,
+                sigma::SigmaPoints<double>& prediction);
 
             void update(
                 state::StateVector<double>& state_vector,
@@ -66,14 +68,17 @@ namespace ukf {
 
         private:
             state::StateVector<double> state_belief_;
+            state::StateVector<double> state_observation_;
 
             state::StateVector<double> blank_;
 
             mtx::CovarianceMatrix<double> covariance_;
             mtx::CovarianceMatrix<double> covariance_belief_;
+            mtx::Matrix<double> observation_uncertainty_;
 
             mtx::Matrix<double> cholesky_matrix_;
             mtx::Matrix<double> noise_r_;
+            mtx::Matrix<double> noise_q_;
 
             // rename this
             mtx::Matrix<double> holder_;
@@ -83,7 +88,7 @@ namespace ukf {
             sigma::SigmaPoints<double> sigma_prev_;
             sigma::SigmaPoints<double> sigma_prior_;
             sigma::SigmaPoints<double> sigma_uncertainty_;
-
+            sigma::SigmaPoints<double> sigma_observation_;
 
 
             state::WeightVector<double> mean_weights_;
