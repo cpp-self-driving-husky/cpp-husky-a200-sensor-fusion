@@ -58,8 +58,6 @@ void testFilterA() {
 
 void testMatrixTimesTranspose() {
 
-    /*
-
     int rows = 3, cols = 5;
 
     mtx::Matrix<double> product(rows,rows);
@@ -70,23 +68,58 @@ void testMatrixTimesTranspose() {
 
     matrix.print();
 
-    ukf::UnscentedKalmanFilter filter(rows,cols);
+    ukf::UnscentedKalmanFilter filter(rows);
     filter.matrixTimesTranspose(product,matrix);
 
     //matrix.print();
     product.print();
 
-    */
+
+}
+
+
+void testMatrixMultiply() {
+
+    std::vector<double> elems_a = {
+        4,5,1,7,8,
+        1,2,0,4,5,
+        1,2,3,4,7
+    };
+
+    std::vector<double> elems_b = {
+        8,7,2,
+        4,5,6,
+        2,7,2,
+        3,4,5,
+        9,1,5
+    };
+
+    int row_a = 3, col_a = 5;
+    int row_b = 5, col_b = 3;
+    int row_p = 3, col_p = 3;
+
+    mtx::Matrix<double> product(row_p,col_p);
+    mtx::Matrix<double> multiplier(row_a,col_a);
+    mtx::Matrix<double> multiplicand(row_b,col_b);
+
+    for (int i = 0; i < row_a*col_a; ++i) {
+        multiplier[i] = elems_a[i];
+        multiplicand[i] = elems_b[i];
+    }
+
+    ukf::UnscentedKalmanFilter filter(row_p);
+    filter.multiplyMatrices(product,multiplier,multiplicand);
+
+    product.print();
 
 }
 
 
 
 
-
 int main(int argc, char* argv[]) {
-    testFilterA();
-    //testMatrixTimesTranspose();
+    //testFilterA();
+    testMatrixMultiply();
     return 0;
 }
 

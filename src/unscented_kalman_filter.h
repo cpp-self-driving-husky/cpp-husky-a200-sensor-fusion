@@ -33,6 +33,11 @@ namespace ukf {
                 mtx::Matrix<double>& product,
                 mtx::Matrix<double>& matrix);
 
+            void multiplyMatrices(
+                mtx::Matrix<double>& product,
+                mtx::Matrix<double>& multiplier,
+                mtx::Matrix<double>& multiplicand);
+
             void calculateSigmaPoints(
                 sigma::SigmaPoints<double>& sigma,
                 state::StateVector<double>& state,
@@ -59,6 +64,14 @@ namespace ukf {
                 sigma::SigmaPoints<double>& observation,
                 sigma::SigmaPoints<double>& prediction);
 
+            void calculateCrossCovariance(
+                mtx::Matrix<double>& cross_covariance,
+                sigma::SigmaPoints<double>& sigma_uncertainty,
+                sigma::SigmaPoints<double>& sigma_observation,
+                state::StateVector<double>& prediction,
+                state::StateVector<double>& observation,
+                state::WeightVector<double>& weight);
+
             void update(
                 state::StateVector<double>& state_vector,
                 mtx::CovarianceMatrix<double>& covariance_matrix,
@@ -82,7 +95,10 @@ namespace ukf {
 
             // rename this
             mtx::Matrix<double> holder_;
+
             mtx::Matrix<double> matrix_transpose_;
+            mtx::Matrix<double> prediction_matrix_;
+            mtx::Matrix<double> uncertainty_transpose_;
 
             sigma::SigmaPoints<double> sigma_;
             sigma::SigmaPoints<double> sigma_prev_;

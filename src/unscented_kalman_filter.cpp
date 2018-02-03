@@ -23,7 +23,16 @@ ukf::UnscentedKalmanFilter::UnscentedKalmanFilter(int n) :
 
     cholesky_matrix_(mtx::Matrix<double>(n,n)),
     holder_(mtx::Matrix<double>(n,this->pointsPerState(n))),
+
+
+    // todo delete?
     matrix_transpose_(mtx::Matrix<double>(n,n)),
+    // todo delete?
+
+
+    prediction_matrix_(mtx::Matrix<double>(n,this->pointsPerState(n))),
+    uncertainty_transpose_(mtx::Matrix<double>(this->pointsPerState(n),n)),
+
     noise_r_(mtx::Matrix<double>(n,n)),
     noise_q_(mtx::Matrix<double>(n,n)),
 
@@ -165,6 +174,21 @@ void ukf::UnscentedKalmanFilter::matrixTimesTranspose(
 }
 
 
+void ukf::UnscentedKalmanFilter::multiplyMatrices(
+    mtx::Matrix<double>& product,
+    mtx::Matrix<double>& multiplier,
+    mtx::Matrix<double>& multiplicand)
+{
+    product.zero();
+    int rows = multiplier.getRows();
+    int inner = multiplier.getCols();
+    int cols = multiplicand.getCols();
+    for (int i = 0; i < rows; ++i)
+        for (int j = 0; j < cols; ++j)
+            for (int k = 0; k < inner; ++k)
+                product[i*cols+j] += multiplier[i*inner+k] * multiplicand[k*cols+j];
+}
+
 
 void ukf::UnscentedKalmanFilter::sumWeighedCovariance(
     mtx::Matrix<double>& covariance,
@@ -176,10 +200,14 @@ void ukf::UnscentedKalmanFilter::sumWeighedCovariance(
     covariance.zero();
     int vars = sigma.getStateSize();
     int points = sigma.getSize();
+
+    // check to make sure this is correct!
+    // may have to transpose it as it is copied!
     for (int i = 0; i < points; ++i)
         for (int j = 0; j < vars; ++j)
             this->holder_[i*vars+j] = sigma[i][j] - belief[j];
 
+    // could be consolidated with loops above?
     for (int i = 0; i < points; ++i)
         for (int j = 0; j < vars; ++j)
             this->holder_[i*vars+j] *= weight[i];
@@ -189,7 +217,6 @@ void ukf::UnscentedKalmanFilter::sumWeighedCovariance(
         this->holder_);
 
     covariance += noise;
-
 }
 
 
@@ -203,8 +230,37 @@ void ukf::UnscentedKalmanFilter::predictionFunction(
 }
 
 
+void ukf::UnscentedKalmanFilter::calculateCrossCovariance(
+    mtx::Matrix<double>& cross_covariance,
+    sigma::SigmaPoints<double>& sigma_uncertainty,
+    sigma::SigmaPoints<double>& sigma_observation,
+    state::StateVector<double>& prediction,
+    state::StateVector<double>& observation,
+    state::WeightVector<double>& weight)
+{
+    int vars = sigma_uncertainty.getStateSize();
+    int points = sigma_uncertainty.getSize();
+    for (int i = 0; i < points; ++i) {
+        for (int j = 0; j < vars; ++j) {
+            this->prediction_matrix_[j*points+i] = sigma_uncertainty[i][j] - prediction[j];
+            this->uncertainty_transpose_[i*vars+j] = sigma_observation[i][j] - prediction[j];
+        }
+    }
 
+    // can be consolidated with loop above?
+    for (int i = 0; i < points; ++i) {
+        for (int j = 0; j < vars; ++j) {
+            this->prediction_matrix_[j*points+i] *= weight[i];
+            this->uncertainty_transpose_[i*vars+j] *= weight[i];
+        }
+    }
 
+    this->multiplyMatrices(
+        cross_covariance,
+        this->prediction_matrix_,
+        this->uncertainty_transpose_);
+
+}
 
 
 void ukf::UnscentedKalmanFilter::update(
@@ -256,7 +312,6 @@ void ukf::UnscentedKalmanFilter::update(
         this->sigma_observation_,
         this->state_observation_,
         this->noise_q_);
-
 
 
 
