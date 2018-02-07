@@ -154,79 +154,6 @@ namespace mtx {
                 U.setCols(this->rows_);
             }
 
-
-
-            /*
-
-            void getCofactor(T* A, T* temp, int p, int q, int n) {
-                int i = 0, j = 0;
-                for (int row = 0; row < n; row++) {
-                    for (int col = 0; col < n; col++) {
-                        if (row != p && col != q) {
-                            temp[i*this->cols_+j] = A[row*this->cols_+col];
-                            ++j;
-                            if (j == n-1) {
-                                j = 0;
-                                i++;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // TODO This needs to be made more efficient!
-            //      allocating memory like this is slow!
-            int determinant(T* A, int n) {
-                int D = 0;
-                if (n == 1)
-                    return A[0];
-                T* temp = new T[n*n];
-                int sign = 1;
-                for (int f = 0; f < n; f++) {
-                    this->getCofactor(A,temp, 0, f, n);
-                    D += sign * A[f] * determinant(temp, n-1);
-                    sign = -sign;
-                }
-                delete[] temp;
-                return D;
-            }
-
-            void adjoint(T* A, T* adj, int N) {
-                if (N == 0) {
-                    adj[0] = 1;
-                    return;
-                }
-                int sign = 1;
-                T* temp = new T[N*N];
-                for (int i = 0; i < N; ++i) {
-                    for (int j = 0; j < N; ++j) {
-                        this->getCofactor(A,temp,i,j,N);
-                        sign = ((i+j) % 2 == 0) ? 1 : -1;
-                        adj[j*N+i] = sign*this->determinant(temp,N-1);
-                    }
-                }
-            }
-
-            bool invert(Matrix<T>& inverse) {
-                int len = this->rows_*this->cols_;
-                T* A = new T[len];
-                for (int i = 0; i < len; ++i)
-                    A[i] = this->matrix_[i];
-                T det = this->determinant(A,this->rows_);
-                if (det == 0)
-                    return false;
-                T* adj = new T[len];
-                this->adjoint(A,adj,this->rows_);
-                for (int i = 0; i < len; ++i)
-                    inverse[i] = adj[i] / det;
-                delete[] A;
-                delete[] adj;
-                return true;
-            }
-
-            */
-
-
             bool LUPdecompose(state::StateVector<int>& P) {
                 int len = this->rows_, kd = 0, kswap;
                 T p, t;
@@ -264,6 +191,38 @@ namespace mtx {
                 return true;
             }
 
+            bool LUPinverse(
+                mtx::Matrix<T>& LU,mtx::Matrix<T>& B,
+                state::StateVector<int>& P,
+                state::StateVector<T>& X,
+                state::StateVector<T>& Y)
+            {
+                int len = LU.getRows();
+                for (int i = 0; i < len; ++i) {
+                    for (int j = 0; j < len; ++j)
+                        B[i*len+j] = 0.0;
+                    B[i*len+i] = 1.0;
+                    for (int n = 0; n < len; ++n) {
+                        T t = 0.0;
+                        for (int m = 0; m <= n-1; ++m )
+                            t += LU[n*len+m]*Y[m];
+                        Y[n] = B[i*len+P[n]]-t;
+                    }
+                    for (int n = len-1; n>=0; --n) {
+                        T t = 0.0;
+                        for (int m = n+1; m < len; ++m)
+                            t += LU[n*len+m]*X[m];
+                        X[n] = (Y[n]-t) / LU[n*len+n];
+                    }
+                    for (int j = 0; j < len; ++j)
+                        B[i*len+j] = X[j];
+
+                }
+                for (int i = 0; i < len; ++i)
+                    for (int j = 0; j < len; ++j)
+                        LU[i*len+j] = B[j*len+i];
+                return true;
+            }
 
             void covariance(
                 Matrix<T>& covariance_matrix,

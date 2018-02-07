@@ -53,6 +53,20 @@ void placeElementsA(mtx::Matrix<double>& matrix) {
 }
 
 
+void placeElementsB(mtx::Matrix<double>& matrix) {
+
+    std::vector<double> samples = {
+        10,4,1,
+        2,1,6,
+        3,7,5
+    };
+
+    for (int i = 0; i < matrix.getSize(); ++i)
+        matrix[i] = samples[i];
+
+}
+
+
 void testMatrixA() {
 
     std::vector<double> covariance_samples = {
@@ -165,8 +179,19 @@ void testInverseA() {
     inverse.LUPdecompose(permutation);
 
     matrix.print();
-    inverse.print();
+    //inverse.print();
 
+    //permutation.print();
+
+    state::StateVector<double> X(N);
+    state::StateVector<double> Y(N);
+
+    mtx::Matrix<double> intermediate(N,N);
+
+
+    matrix.LUPinverse(inverse,intermediate,permutation,X,Y);
+
+    inverse.print();
 
 }
 
