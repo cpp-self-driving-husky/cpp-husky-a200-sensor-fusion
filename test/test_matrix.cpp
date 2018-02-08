@@ -7,6 +7,9 @@
 #include "../src/matrix.h"
 
 
+using Calculator = mtx::MatrixCalculator<double>;
+
+
 
 void printVector(
     std::string msg,
@@ -56,9 +59,23 @@ void placeElementsA(mtx::Matrix<double>& matrix) {
 void placeElementsB(mtx::Matrix<double>& matrix) {
 
     std::vector<double> samples = {
-        10,4,1,
-        2,1,6,
-        3,7,5
+        7,4,1,0,
+        2,1,6,3,
+        3,7,5,8
+    };
+
+    for (int i = 0; i < matrix.getSize(); ++i)
+        matrix[i] = samples[i];
+
+}
+
+
+void placeElementsC(mtx::Matrix<double>& matrix) {
+
+    std::vector<double> samples = {
+        1,2,7,2,
+        4,7,6,5,
+        6,2,3,0
     };
 
     for (int i = 0; i < matrix.getSize(); ++i)
@@ -177,21 +194,37 @@ void testInverseA() {
         inverse[i] = matrix[i];
 
     inverse.LUPdecompose(permutation);
-
     matrix.print();
-    //inverse.print();
-
-    //permutation.print();
 
     state::StateVector<double> X(N);
     state::StateVector<double> Y(N);
-
     mtx::Matrix<double> intermediate(N,N);
 
-
-    matrix.LUPinverse(inverse,intermediate,permutation,X,Y);
+    inverse.LUPinverse(intermediate,permutation,X,Y);
 
     inverse.print();
+
+}
+
+
+
+void testCalculatorA() {
+
+    int row = 3, col = 4;
+    mtx::Matrix<double> A(row,col);
+    mtx::Matrix<double> B(col,row);
+    placeElementsB(A);
+    placeElementsC(B);
+    mtx::Matrix<double> P(row,row);
+    Calculator::init(row,row);
+    Calculator::multiply(P,A,B);
+    A.print();
+    B.print();
+    P.print();
+
+    //Calculator::init(row,col);
+    //Calculator::storeMatrix(matrix);
+    //Calculator::print();
 
 }
 
@@ -200,7 +233,11 @@ void testInverseA() {
 int main(int argc, char* argv[]) {
 
     auto start = std::chrono::system_clock::now();
-    testInverseA();
+
+    //testInverseA();
+
+    testCalculatorA();
+
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);

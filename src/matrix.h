@@ -192,12 +192,12 @@ namespace mtx {
             }
 
             bool LUPinverse(
-                mtx::Matrix<T>& LU,mtx::Matrix<T>& B,
+                mtx::Matrix<T>& B,
                 state::StateVector<int>& P,
                 state::StateVector<T>& X,
                 state::StateVector<T>& Y)
             {
-                int len = LU.getRows();
+                int len = this->rows_;
                 for (int i = 0; i < len; ++i) {
                     for (int j = 0; j < len; ++j)
                         B[i*len+j] = 0.0;
@@ -205,14 +205,14 @@ namespace mtx {
                     for (int n = 0; n < len; ++n) {
                         T t = 0.0;
                         for (int m = 0; m <= n-1; ++m )
-                            t += LU[n*len+m]*Y[m];
+                            t += this->matrix_[n*len+m]*Y[m];
                         Y[n] = B[i*len+P[n]]-t;
                     }
                     for (int n = len-1; n>=0; --n) {
                         T t = 0.0;
                         for (int m = n+1; m < len; ++m)
-                            t += LU[n*len+m]*X[m];
-                        X[n] = (Y[n]-t) / LU[n*len+n];
+                            t += this->matrix_[n*len+m]*X[m];
+                        X[n] = (Y[n]-t) / this->matrix_[n*len+n];
                     }
                     for (int j = 0; j < len; ++j)
                         B[i*len+j] = X[j];
@@ -220,7 +220,7 @@ namespace mtx {
                 }
                 for (int i = 0; i < len; ++i)
                     for (int j = 0; j < len; ++j)
-                        LU[i*len+j] = B[j*len+i];
+                        this->matrix_[i*len+j] = B[j*len+i];
                 return true;
             }
 
@@ -314,8 +314,54 @@ namespace mtx {
     template<class T>
     using CovarianceMatrix = Matrix<T>;
 
-}
 
+    // matrix calculator class
+    template<class T>
+    class MatrixCalculator {
+
+        public:
+            static void init(int rows, int cols) {
+                MatrixCalculator::store_.init(rows,cols);
+            }
+
+            static void storeMatrix(Matrix<T>& matrix) {
+                int elems = matrix.getRows()*matrix.getCols();
+                for (int i = 0; i < elems; ++i)
+                    MatrixCalculator::store_[i] = matrix[i];
+            }
+
+            static void multiply(Matrix<T>& P, Matrix<T>& A, Matrix<T>& B) {
+                P.zero();
+                int rows = A.getRows();
+                int inner = A.getCols();
+                int cols = B.getCols();
+                for (int i = 0; i < rows; ++i)
+                    for (int j = 0; j < cols; ++j)
+                        for (int k = 0; k < inner; ++k)
+                            P[i*cols+j] += A[i*inner+k] * B[k*cols+j];
+            }
+
+
+
+
+            static void print() {
+                MatrixCalculator::store_.print();
+            }
+
+        private:
+            MatrixCalculator();
+            ~MatrixCalculator();
+
+        private:
+            static Matrix<T> store_;
+
+
+    };
+
+    template<class T>
+    Matrix<T> MatrixCalculator<T>::store_(0,0);
+
+}
 
 #endif
 
