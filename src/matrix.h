@@ -3,7 +3,9 @@
 #include <cmath>
 #include "state_vector.h"
 
-// test for printing
+
+// TODO remove inclusion
+//      test for printing
 #include<iostream>
 
 
@@ -154,6 +156,12 @@ namespace mtx {
                 U.setCols(this->rows_);
             }
 
+            void swapDimensions() {
+                int sub = this->rows_;
+                this->rows_ = this->cols_;
+                this->cols_ = sub;
+            }
+
             bool LUPdecompose(state::StateVector<int>& P) {
                 int len = this->rows_, kd = 0, kswap;
                 T p, t;
@@ -247,6 +255,8 @@ namespace mtx {
                 }
             }
 
+            // TODO remove this function
+            //      is in Calculator class now
             void cholesky(Matrix<T>& L) {
                 int n = this->rows_;
                 int elems = L.getRows()*L.getCols();
@@ -315,51 +325,114 @@ namespace mtx {
     using CovarianceMatrix = Matrix<T>;
 
 
+    namespace {
+        const int DEFAULT_STORAGE = 100;
+    };
+
+
     // matrix calculator class
     template<class T>
-    class MatrixCalculator {
+    class Calculator {
 
         public:
-            static void init(int rows, int cols) {
-                MatrixCalculator::store_.init(rows,cols);
+            Calculator() :
+                storage_(mtx::Matrix<T>(1,DEFAULT_STORAGE))
+            {}
+
+            Calculator(int elems) :
+                storage_(mtx::Matrix<T>(1,this->storageSize(elems)))
+            {}
+
+            ~Calculator() {
+                this->destroy();
             }
 
-            static void storeMatrix(Matrix<T>& matrix) {
-                int elems = matrix.getRows()*matrix.getCols();
+            void init(int elems) {
+                this->destroy();
+                this->storage_ = Matrix<T>(1,this->storageSize(elems));
+            }
+
+            int storageSize(int elems) {
+                int storage_size = static_cast<int>(std::pow(elems,3));
+                return
+                    storage_size > DEFAULT_STORAGE ?
+                    storage_size : DEFAULT_STORAGE;
+            }
+
+            void destroy() {
+                this->storage_.destroy();
+            }
+
+            void duplicate(Matrix<T>& matrix) {
+                int elems = matrix.getSize();
                 for (int i = 0; i < elems; ++i)
-                    MatrixCalculator::store_[i] = matrix[i];
+                    this->storage_[i] = matrix[i];
             }
 
-            static void multiply(Matrix<T>& P, Matrix<T>& A, Matrix<T>& B) {
+            void zero(int len) {
+                for (int i = 0; i < len; ++i)
+                    this->storage_[i] = 0.0;
+            }
+
+            void transpose(Matrix<T>& trans) {
+                this->duplicate(trans);
+                this->transpose(trans,this->storage_);
+            }
+
+            void transpose(mtx::Matrix<T>& trans, mtx::Matrix<T>& matrix) {
+                int rows = trans.getRows(),
+                    cols = trans.getCols();
+                for (int i = 0; i < rows; ++i)
+                    for (int j = 0; j < cols; ++j)
+                        trans[j*rows+i] = matrix[i*cols+j];
+                trans.swapDimensions();
+            }
+
+            void multiply(Matrix<T>& P, Matrix<T>& A, Matrix<T>& B) {
                 P.zero();
-                int rows = A.getRows();
-                int inner = A.getCols();
-                int cols = B.getCols();
+                int rows = A.getRows(),
+                    inner = A.getCols(),
+                    cols = B.getCols();
                 for (int i = 0; i < rows; ++i)
                     for (int j = 0; j < cols; ++j)
                         for (int k = 0; k < inner; ++k)
                             P[i*cols+j] += A[i*inner+k] * B[k*cols+j];
             }
 
-
-
-
-            static void print() {
-                MatrixCalculator::store_.print();
+            void cholesky(Matrix<T>& L) {
+                this->duplicate(L);
+                this->cholesky(L,this->storage_);
             }
 
-        private:
-            MatrixCalculator();
-            ~MatrixCalculator();
+            void cholesky(Matrix<T>& L, Matrix<T>& A) {
+                L.zero();
+                int elems = L.getSize(),
+                    n = L.getRows();
+                for (int i = 0; i < n; ++i) {
+                    for (int j = 0; j < (i+1); ++j) {
+                        T s = 0.0;
+                        for (int k = 0; k < j; ++k)
+                            s += L[i*n+k] * L[j*n+k];
+                        L[i*n+j] = (i == j) ?
+                            std::sqrt(A[i*n+i] - s) :
+                            (1.0 / L[j*n+j] * (A[i*n+j] - s));
+                    }
+                }
+            }
+
+
+
+
+
+            int getStorageSize() {
+                return this->storage_.getSize();
+            }
+
 
         private:
-            static Matrix<T> store_;
-
+            Matrix<T> storage_;
 
     };
-
-    template<class T>
-    Matrix<T> MatrixCalculator<T>::store_(0,0);
 
 }
 
