@@ -76,39 +76,10 @@ namespace mtx {
                     this->matrix_[i] += matrix.matrix_[i];
             }
 
-            void stateCol(
-                state::StateVector<T>& state,
-                int col)
-            {
-                for (int i = 0; i < this->rows_; ++i)
-                    state[i] = this->matrix_[i*this->rows_+col];
-            }
-
-            void stateRow(
-                state::StateVector<T>& state,
-                int row)
-            {
-                int init_elem = this->cols_*row;
-                for (int i = 0; i < this->cols_; ++i)
-                    state[i] = this->matrix_[i+init_elem];
-            }
-
-            void addVectorMatrixRow(
-                state::StateVector<T>& state,
-                int init_row)
-            {
-                int init_elem = init_row * this->cols_;
-                for (int i = 0; i < this->cols_; ++i)
-                    state[i] += this->matrix_[init_elem+i];
-            }
-
-            void subVectorMatrixRow(
-                state::StateVector<T>& state,
-                int init_row)
-            {
-                int init_elem = init_row * this->cols_;
-                for (int i = 0; i < this->cols_; ++i)
-                    state[i] -= this->matrix_[init_elem+i];
+            void operator*=(T scalar) {
+                for (int r = 0; r < this->rows_; ++r)
+                    for (int c = 0; c < this->cols_; ++c)
+                        this->matrix_[r*this->cols_+c] *= scalar;
             }
 
             void addData(T* data, int meas) {
@@ -136,12 +107,6 @@ namespace mtx {
                     delete[] this->matrix_;
                 this->matrix_ = temp;
                 this->rows_ -= meas;
-            }
-
-            void operator*=(T scalar) {
-                for (int r = 0; r < this->rows_; ++r)
-                    for (int c = 0; c < this->cols_; ++c)
-                        this->matrix_[r*this->cols_+c] *= scalar;
             }
 
             void swapDimensions() {
@@ -183,6 +148,7 @@ namespace mtx {
                     "cols: " << this->cols_ << "\n";
                 std::cout << std::endl;
             }
+
 
         private:
             T* matrix_;

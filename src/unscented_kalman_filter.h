@@ -132,9 +132,5 @@ namespace ukf {
 }
 
 
-
-
-
-
 #endif // UNSCENTED_KALMAN_FILTER_H_
 

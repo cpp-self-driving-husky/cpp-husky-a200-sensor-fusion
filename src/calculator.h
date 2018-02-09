@@ -236,13 +236,15 @@ namespace calc {
                 return true;
             }
 
+            // TODO actually test if invertible
             void inverse(mtx::Matrix<T>& I) {
                 this-LUPdecompose(I);
                 this->LUPinverse(I);
             }
 
+            // TODO actually test if invertible
             void inverse(mtx::Matrix<T>& I, mtx::Matrix<T>& M) {
-                M.replicate(I);
+                I = M;
                 this->LUPdecompose(I);
                 this->LUPinverse(I);
             }

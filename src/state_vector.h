@@ -10,9 +10,9 @@ namespace state {
     class StateVector {
 
         public:
-            //StateVector() :
-            //    vec_(nullptr), vars_(0)
-            //{}
+            StateVector() :
+                vec_(nullptr), vars_(0)
+            {}
 
             StateVector(int vars) :
                 vec_(nullptr), vars_(vars)
@@ -28,18 +28,12 @@ namespace state {
                 this->destroy();
                 this->vars_ = vars;
                 this->vec_ = new T[this->vars_];
-                for (int i = 0; i < this->vars_; ++i)
-                    this->vec_[i] = 0.0;
+                this->zero();
             }
 
             void zero() {
                 for (int i = 0; i < this->vars_; ++i)
                     this->vec_[i] = 0.0;
-            }
-
-            void replicate(StateVector& state) {
-                for (int i = 0; i < this->vars_; ++i)
-                    state[i] = this->vec_[i];
             }
 
             void destroy() {
@@ -50,21 +44,11 @@ namespace state {
                 this->vars_ = 0;
             }
 
-            int pointsPerState() {
-                return 2*this->vars_+1;
-            }
-
-            T calculateLambda(double alpha, double kappa) {
-                return std::pow(alpha,2)*(this->vars_+kappa)-this->vars_;
-            }
-
-            T calculateGamma(double lambda) {
-                return std::sqrt(this->vars_+lambda);
-            }
-
-            T calculateGamma(double alpha, double kappa) {
-                T lambda = this->calculateLambda(alpha,kappa);
-                return this->calculateGamma(lambda);
+            state::StateVector<T>& operator=(state::StateVector<T>& state) {
+                int vars = state.getVars();
+                for (int i = 0; i < vars; ++i)
+                    this->vec_[i] = state[i];
+                return *this;
             }
 
             T& operator[](int i) {
@@ -103,21 +87,23 @@ namespace state {
     class WeightVector : public StateVector<T> {
 
         public:
-            WeightVector(int vars) {
-                this->init(vars);
+            WeightVector(int vars, int points) :
+                StateVector<T>(),
+                points_(0)
+            {
+                this->init(vars,points);
             }
 
             ~WeightVector() {
                 this->destroy();
             }
 
-            void init(int vars) {
+            void init(int vars, int points) {
                 this->destroy();
                 this->vars_ = vars;
-                this->points_ = this->pointsPerState();
+                this->points_ = points;
                 this->vec_ = new T[this->points_];
-                for (int i = 0; i < this->points_; ++i)
-                    this->vec_[i] = 0.0;
+                this->zero();
             }
 
             void destroy() {
@@ -128,37 +114,48 @@ namespace state {
                 this->vars_ = this->points_ = 0;
             }
 
-            T zeroMean(double alpha, double kappa) {
-                T lambda = this->calculateLambda(alpha,kappa);
+            void zero() {
+                for (int i = 0; i < this->points_; ++i)
+                    this->vec_[i] = 0.0;
+            }
+
+            T zeroMean(T lambda) {
                 return lambda / (this->vars_+lambda);
             }
 
-            T zeroCovariance(double alpha, double kappa, double beta) {
-                T mean = this->zeroMean(alpha,kappa);
+            T zeroCovariance(T lambda, T alpha, T beta) {
+                T mean = this->zeroMean(lambda);
                 return mean + (1 - std::pow(alpha,2) + beta);
             }
 
-            T ithElement(double alpha, double kappa) {
-                T lambda = this->calculateLambda(alpha,kappa);
+            T ithElement(T lambda) {
                 return 1.0 / (2.0 * (lambda + this->vars_));
             }
 
-            void populateMean(double alpha, double kappa) {
-                this->vec_[0] = this->zeroMean(alpha,kappa);
-                T ith_elem = this->ithElement(alpha,kappa);
+            void populateMean(T lambda) {
+                this->vec_[0] = this->zeroMean(lambda);
+                T ith_elem = this->ithElement(lambda);
                 for (int i = 1; i < this->points_; ++i)
                     this->vec_[i] = ith_elem;
             }
 
-            void populateCovariance(double alpha, double kappa, double beta) {
-                this->vec_[0] = this->zeroCovariance(alpha,kappa,beta);
-                T ith_elem = this->ithElement(alpha,kappa);
+            void populateCovariance(T lambda, T alpha, T beta) {
+                this->vec_[0] = this->zeroCovariance(lambda,alpha,beta);
+                T ith_elem = this->ithElement(lambda);
                 for (int i = 1; i < this->points_; ++i)
                     this->vec_[i] = ith_elem;
             }
 
-            int getPoints() {
+            int getNumPoints() {
                 return this->points_;
+            }
+
+            void print() {
+                for (int i = 0; i < this->points_; ++i)
+                    std::cout << this->vec_[i] << " ";
+                std::cout << "\n" <<
+                    "variables: " << this->vars_ << " " <<
+                    "points: " << this->points_ << "\n" << std::endl;
             }
 
         private:

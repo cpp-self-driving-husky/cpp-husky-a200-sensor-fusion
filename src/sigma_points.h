@@ -8,7 +8,6 @@
 #include<iostream>
 
 
-
 namespace sigma {
 
     template<class T>
@@ -81,7 +80,7 @@ namespace sigma {
                 return this->vars_;
             }
 
-            // TODO remove; for debugging purposes
+            // for debugging purposes
             void print() {
                 int num_points = this->points_;
                 int vars = this->vars_;
