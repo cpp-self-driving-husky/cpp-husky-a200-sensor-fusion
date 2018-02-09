@@ -52,7 +52,7 @@ namespace mtx {
                     delete[] this->matrix_;
                     this->matrix_ = nullptr;
                 }
-                rows_ = cols_ = 0;
+                this->rows_ = this->cols_ = 0;
             }
 
             T& elem(int row, int col) {
@@ -325,6 +325,11 @@ namespace mtx {
     using CovarianceMatrix = Matrix<T>;
 
 
+
+    /*
+
+
+
     namespace {
         const int DEFAULT_STORAGE = 100;
     };
@@ -420,7 +425,85 @@ namespace mtx {
                 }
             }
 
+            void swaps(T& a, T& b) {
+                T s = a;
+                a = b;
+                b = s;
+            }
 
+
+            // TODO replace storage_ with int version?
+            bool LUPdecompose(Matrix<T>& L){
+                int len = L.getRows(), kd = 0, kswap;
+                T p, t;
+                for (int i = 0; i < len; ++i)
+                    this->storage_[i] = i;
+                for (int k = 0; k < len-1; ++k) {
+                    p = 0.0;
+                    for (int i = k; i < len; ++i) {
+                        t = L[i*len+k];
+                        if (t < 0)
+                            t *= -1;
+                        if (t > p) {
+                            p = t;
+                            kd = i;
+                        }
+                    }
+                    if (p == 0.0)
+                        return false;
+                    this->swaps(this->storage_[kd],this->storage_[k]);
+                    for (int i = 0; i < len; ++i) {
+                        //t = L[kd*len+i];
+                        //L[kd*len+i] = L[k*len+i];
+                        //L[k*len+i] = t;
+
+                        this->swaps(L[kd*len+i],L[k*len+i]);
+
+                    }
+                    for (int i = k+1; i < len; ++i) {
+                        L[i*len+k] = L[i*len+k] / L[k*len+k];
+                        for (int j = k+1; j < len; ++j)
+                            L[i*len+j] -= L[i*len+k]*L[k*len+j];
+                    }
+                }
+                return true;
+            }
+
+
+
+
+            bool LUPinverse(
+                mtx::Matrix<T>& B,
+                state::StateVector<int>& P,
+                state::StateVector<T>& X,
+                state::StateVector<T>& Y)
+            {
+                int len = this->rows_;
+                for (int i = 0; i < len; ++i) {
+                    for (int j = 0; j < len; ++j)
+                        B[i*len+j] = 0.0;
+                    B[i*len+i] = 1.0;
+                    for (int n = 0; n < len; ++n) {
+                        T t = 0.0;
+                        for (int m = 0; m <= n-1; ++m )
+                            t += this->matrix_[n*len+m]*Y[m];
+                        Y[n] = B[i*len+P[n]]-t;
+                    }
+                    for (int n = len-1; n>=0; --n) {
+                        T t = 0.0;
+                        for (int m = n+1; m < len; ++m)
+                            t += this->matrix_[n*len+m]*X[m];
+                        X[n] = (Y[n]-t) / this->matrix_[n*len+n];
+                    }
+                    for (int j = 0; j < len; ++j)
+                        B[i*len+j] = X[j];
+
+                }
+                for (int i = 0; i < len; ++i)
+                    for (int j = 0; j < len; ++j)
+                        this->matrix_[i*len+j] = B[j*len+i];
+                return true;
+            }
 
 
 
@@ -431,8 +514,15 @@ namespace mtx {
 
         private:
             Matrix<T> storage_;
+            int state_;
 
     };
+
+
+    */
+
+
+
 
 }
 

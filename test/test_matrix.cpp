@@ -4,7 +4,9 @@
 #include <chrono>
 #include <ctime>
 #include <cmath>
-#include "../src/matrix.h"
+//#include "../src/matrix.h"
+#include "../src/calculator.h"
+
 
 
 void printVector(
@@ -114,7 +116,7 @@ void placeCovarianceA(mtx::Matrix<double>& matrix) {
 void testCalculatorStorage() {
 
     int row = 4, col = 6;
-    mtx::Calculator<double> calc(100);
+    calc::Calculator<double> calc(100);
     mtx::Matrix<double> a(row,col);
     placeElementsA(a);
     a.print();
@@ -248,7 +250,7 @@ void testCalculatorA() {
     placeElementsB(A);
     placeElementsC(B);
 
-    mtx::Calculator<double> calculator;
+    calc::Calculator<double> calculator(col);
     calculator.multiply(P,A,B);
 
     A.print();
@@ -269,7 +271,7 @@ void testCalculatorB() {
 
     data.covariance(matrix,state);
 
-    mtx::Calculator<double> calc;
+    calc::Calculator<double> calc(vars);
     calc.cholesky(cholesky,matrix);
 
     matrix.print();
@@ -300,7 +302,7 @@ void testCalculatorC() {
 
     mtx::Matrix<double> cholesky_matrix(side,side);
 
-    mtx::Calculator<double> calc;
+    calc::Calculator<double> calc(side);
     calc.cholesky(cholesky_matrix,covariance_matrix);
 
     covariance_matrix.print();
@@ -315,7 +317,7 @@ void testCalculatorD() {
     mtx::Matrix<double> matrix(rows,cols);
     mtx::Matrix<double> transpose(rows,cols);
     placeElementsA(matrix);
-    mtx::Calculator<double> calc;
+    calc::Calculator<double> calc(rows);
     calc.transpose(transpose,matrix);
     matrix.print();
     transpose.print();
@@ -328,7 +330,7 @@ void testCalculatorE() {
     int rows = 6, cols = 3;
     mtx::Matrix<double> transpose(rows,cols);
     placeElementsA(transpose);
-    mtx::Calculator<double> calc;
+    calc::Calculator<double> calc(rows);
     transpose.print();
     calc.transpose(transpose);
     transpose.print();
@@ -336,20 +338,20 @@ void testCalculatorE() {
 }
 
 
-
-
 void testCalculatorF() {
 
     int side = 5;
-    int elems = side*side;
+    //int elems = side*side;
 
-    mtx::Calculator<double> calc;
+    calc::Calculator<double> calc;
     mtx::Matrix<double> data_matrix(side,side);
     mtx::Matrix<double> covariance(side,side);
     mtx::Matrix<double> cholesky(side,side);
 
     state::StateVector<double> mean_vector(side);
     placeElementsA(data_matrix);
+
+    calc.init(side);
 
     data_matrix.covariance(covariance,mean_vector);
     covariance.print();
@@ -360,8 +362,28 @@ void testCalculatorF() {
     calc.cholesky(covariance);
     covariance.print();
 
+
+
 }
 
+
+void testCalculatorDecomposeA() {
+
+    int dim = 5;
+    calc::Calculator<double> calc(dim);
+    mtx::Matrix<double> matrix(dim,dim);
+    state::StateVector<int> permutation(dim);
+    placeElementsA(matrix);
+
+    matrix.print();
+    calc.LUPdecompose(matrix);
+    matrix.print();
+
+    //matrix.print();
+    //matrix.LUPdecompose(permutation);
+    //matrix.print();
+
+}
 
 
 
@@ -369,6 +391,7 @@ int main(int argc, char* argv[]) {
 
     auto start = std::chrono::system_clock::now();
 
+    //testCalculatorDecomposeA();
     testCalculatorF();
 
     auto end = std::chrono::system_clock::now();
