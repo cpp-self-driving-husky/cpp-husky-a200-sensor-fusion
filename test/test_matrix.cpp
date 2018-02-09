@@ -4,7 +4,6 @@
 #include <chrono>
 #include <ctime>
 #include <cmath>
-//#include "../src/matrix.h"
 #include "../src/calculator.h"
 
 
@@ -70,6 +69,26 @@ void placeCovarianceB(mtx::Matrix<double>& matrix) {
 }
 
 
+
+void placeDataA(mtx::Matrix<double>& matrix) {
+
+    std::vector<double> samples = {
+        10,4,21,7,13,
+        11,2,25,9,17,
+        3,11,21,4,31,
+        14,2,24,8,11,
+        15,9,23,9,14,
+        12,3,20,9,15,
+        13,4,22,8,16
+    };
+
+    for (int i = 0; i < matrix.getSize(); ++i)
+        matrix[i] = samples[i];
+
+}
+
+
+
 void placeElementsB(mtx::Matrix<double>& matrix) {
 
     std::vector<double> samples = {
@@ -132,6 +151,28 @@ void testCalculatorStorage() {
     a.print();
     std::cout << "\n" << "finished computation at " << std::ctime(&end_time)
               << "elapsed time: " << elapsed_seconds.count() << "s" << "\n\n";
+
+}
+
+
+void testCalculatorCovarianceA() {
+
+    int obs = 7, vars = 5;
+    int rows = obs, cols = vars;
+    calc::Calculator<double> calc(vars);
+    mtx::Matrix<double> data(obs,vars);
+    mtx::Matrix<double> covariance(vars,vars);
+    state::StateVector<double> state(vars);
+    placeDataA(data);
+    calc.mean(state,data);
+    calc.covariance(covariance,data,state);
+
+    data.print();
+    state.print();
+    covariance.print();
+
+    calc.cholesky(covariance);
+    covariance.print();
 
 }
 
@@ -236,7 +277,6 @@ void testCalculatorE() {
 void testCalculatorF() {
 
     int side = 5;
-    //int elems = side*side;
 
     calc::Calculator<double> calc;
     mtx::Matrix<double> data_matrix(side,side);
@@ -256,8 +296,6 @@ void testCalculatorF() {
 
     calc.cholesky(covariance);
     covariance.print();
-
-
 
 }
 
@@ -288,7 +326,7 @@ int main(int argc, char* argv[]) {
 
     auto start = std::chrono::system_clock::now();
 
-    testCalculatorInverseA();
+    testCalculatorCovarianceA();
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;

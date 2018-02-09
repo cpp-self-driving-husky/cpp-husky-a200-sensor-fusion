@@ -20,18 +20,15 @@ ukf::UnscentedKalmanFilter::UnscentedKalmanFilter(int n) :
     covariance_(mtx::CovarianceMatrix<double>(n,n)),
     covariance_belief_(mtx::CovarianceMatrix<double>(n,n)),
     observation_uncertainty_(mtx::Matrix<double>(n,n)),
+    cross_covariance_(mtx::CovarianceMatrix<double>(n,n)),
 
     cholesky_matrix_(mtx::Matrix<double>(n,n)),
-    holder_(mtx::Matrix<double>(n,this->pointsPerState(n))),
-
-
-    // todo delete?
-    matrix_transpose_(mtx::Matrix<double>(n,n)),
-    // todo delete?
-
+    prediction_holder_(mtx::Matrix<double>(n,this->pointsPerState(n))),
 
     prediction_matrix_(mtx::Matrix<double>(n,this->pointsPerState(n))),
     uncertainty_transpose_(mtx::Matrix<double>(this->pointsPerState(n),n)),
+
+    kalman_gain_(mtx::Matrix<double>(n,n)),
 
     noise_r_(mtx::Matrix<double>(n,n)),
     noise_q_(mtx::Matrix<double>(n,n)),
@@ -205,16 +202,16 @@ void ukf::UnscentedKalmanFilter::sumWeighedCovariance(
     // may have to transpose it as it is copied!
     for (int i = 0; i < points; ++i)
         for (int j = 0; j < vars; ++j)
-            this->holder_[i*vars+j] = sigma[i][j] - belief[j];
+            this->prediction_holder_[i*vars+j] = sigma[i][j] - belief[j];
 
     // could be consolidated with loops above?
     for (int i = 0; i < points; ++i)
         for (int j = 0; j < vars; ++j)
-            this->holder_[i*vars+j] *= weight[i];
+            this->prediction_holder_[i*vars+j] *= weight[i];
 
     this->matrixTimesTranspose(
         covariance,
-        this->holder_);
+        this->prediction_holder_);
 
     covariance += noise;
 }
@@ -261,6 +258,18 @@ void ukf::UnscentedKalmanFilter::calculateCrossCovariance(
         this->uncertainty_transpose_);
 
 }
+
+
+void ukf::UnscentedKalmanFilter::calculateKalmanGain(
+    mtx::Matrix<double>& kalman_gain,
+    mtx::Matrix<double>& covariance,
+    mtx::Matrix<double>& uncertainty)
+{
+
+
+
+}
+
 
 
 void ukf::UnscentedKalmanFilter::update(
@@ -313,7 +322,19 @@ void ukf::UnscentedKalmanFilter::update(
         this->state_observation_,
         this->noise_q_);
 
+    this->calculateCrossCovariance(
+        this->cross_covariance_,
+        this->sigma_uncertainty_,
+        this->sigma_observation_,
+        this->state_belief_,
+        this->state_observation_,
+        this->covariance_weights_);
 
+
+
+
+
+    std::cout << "\n" << "end of filter" << "\n" << std::endl;
 
 }
 

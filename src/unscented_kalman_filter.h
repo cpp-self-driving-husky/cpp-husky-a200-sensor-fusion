@@ -72,6 +72,13 @@ namespace ukf {
                 state::StateVector<double>& observation,
                 state::WeightVector<double>& weight);
 
+            void calculateKalmanGain(
+                mtx::Matrix<double>& kalman_gain,
+                mtx::Matrix<double>& covariance,
+                mtx::Matrix<double>& uncertainty);
+
+
+
             void update(
                 state::StateVector<double>& state_vector,
                 mtx::CovarianceMatrix<double>& covariance_matrix,
@@ -88,17 +95,19 @@ namespace ukf {
             mtx::CovarianceMatrix<double> covariance_;
             mtx::CovarianceMatrix<double> covariance_belief_;
             mtx::Matrix<double> observation_uncertainty_;
+            mtx::CovarianceMatrix<double> cross_covariance_;
 
             mtx::Matrix<double> cholesky_matrix_;
             mtx::Matrix<double> noise_r_;
             mtx::Matrix<double> noise_q_;
 
             // rename this
-            mtx::Matrix<double> holder_;
+            mtx::Matrix<double> prediction_holder_;
 
-            mtx::Matrix<double> matrix_transpose_;
             mtx::Matrix<double> prediction_matrix_;
             mtx::Matrix<double> uncertainty_transpose_;
+
+            mtx::Matrix<double> kalman_gain_;
 
             sigma::SigmaPoints<double> sigma_;
             sigma::SigmaPoints<double> sigma_prev_;

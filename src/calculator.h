@@ -88,7 +88,7 @@ namespace calc {
             }
 
             template<typename S>
-            void zero(S elements, int len) {
+            void zero(S* elements, int len) {
                 for (int i = 0; i < len; ++i)
                     elements[i] = 0.0;
             }
@@ -98,6 +98,38 @@ namespace calc {
                 S s = a;
                 a = b;
                 b = s;
+            }
+
+            void mean(state::StateVector<T>& state, mtx::Matrix<T>& data) {
+                int vars = state.getVars();
+                for (int v = 0; v < vars; ++v) {
+                    state[v] = 0.0;
+                    for (int m = 0; m < data.getRows(); ++m)
+                        state[v] += data[vars*m+v];
+                    state[v] /= data.getRows();
+                }
+            }
+
+            void covariance(
+                mtx::Matrix<T>& cov,
+                mtx::Matrix<T>& data,
+                state::StateVector<T>& mean)
+            {
+                int meas = data.getRows(),
+                    vars = data.getCols(),
+                    dim = cov.getRows();
+                for (int i = 0; i < dim; ++i) {
+                    for (int j = i; j < dim; ++j) {
+                        T variance = 0.0;
+                        for (int k = 0; k < meas; ++k)
+                            variance +=
+                                (data[k*vars+j]-mean[i]) *
+                                (data[k*vars+i]-mean[j]);
+                        variance /= (meas-1);
+                        cov[i*dim+j] = variance;
+                        cov[j*dim+i] = variance;
+                    }
+                }
             }
 
             void transpose(mtx::Matrix<T>& trans) {

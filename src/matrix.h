@@ -70,7 +70,6 @@ namespace mtx {
                 return *this;
             }
 
-            // TODO test this!
             void operator+=(mtx::Matrix<T>& matrix) {
                 int elems = this->rows_*this->cols_;
                 for (int i = 0; i < elems; ++i)
@@ -145,43 +144,10 @@ namespace mtx {
                         this->matrix_[r*this->cols_+c] *= scalar;
             }
 
-            void mean(state::StateVector<T>& state) {
-                int vars = state.getVars();
-                for (int v = 0; v < vars; ++v) {
-                    state[v] = 0.0;
-                    for (int m = 0; m < this->rows_; ++m)
-                        state[v] += this->matrix_[vars*m+v];
-                    state[v] /= this->rows_;
-                }
-            }
-
             void swapDimensions() {
                 int sub = this->rows_;
                 this->rows_ = this->cols_;
                 this->cols_ = sub;
-            }
-
-            void covariance(
-                Matrix<T>& covariance_matrix,
-                state::StateVector<T>& mean_vector)
-            {
-                int meas = this->rows_;
-                int vars = this->cols_;
-                int dimension = covariance_matrix.getRows();
-                for (int i = 0; i < dimension; ++i) {
-                    for (int j = i; j < dimension; ++j) {
-                        T y_mean = mean_vector[i];
-                        T x_mean = mean_vector[j];
-                        T variance = 0.0;
-                        for (int k = 0; k < meas; ++k)
-                            variance +=
-                                (this->matrix_[k*vars+j]-x_mean) *
-                                (this->matrix_[k*vars+i]-y_mean);
-                        variance /= (meas-1);
-                        covariance_matrix[i*dimension+j] = variance;
-                        covariance_matrix[j*dimension+i] = variance;
-                    }
-                }
             }
 
             void setRows(int rows) {

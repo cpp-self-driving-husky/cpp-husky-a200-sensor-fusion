@@ -10,10 +10,9 @@ namespace state {
     class StateVector {
 
         public:
-
-            StateVector() :
-                vec_(nullptr), vars_(0)
-            {}
+            //StateVector() :
+            //    vec_(nullptr), vars_(0)
+            //{}
 
             StateVector(int vars) :
                 vec_(nullptr), vars_(vars)
@@ -84,13 +83,11 @@ namespace state {
                     "variables " << this->vars_ << "\n\n";
             }
 
-
         protected:
             T* vec_;
             int vars_;
 
     };
-
 
     template<class T>
     using ControlVector = StateVector<T>;
@@ -106,9 +103,7 @@ namespace state {
     class WeightVector : public StateVector<T> {
 
         public:
-            WeightVector(int vars) :
-                StateVector<T>(vars)
-            {
+            WeightVector(int vars) {
                 this->init(vars);
             }
 
@@ -175,6 +170,4 @@ namespace state {
 
 
 #endif // STATE_VECTOR_H_
-
-
 
