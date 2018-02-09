@@ -136,111 +136,6 @@ void testCalculatorStorage() {
 }
 
 
-void testMatrixA() {
-
-    std::vector<double> covariance_samples = {
-        10,4,21,7,13,
-        23,1,6,9,17,
-        3,11,5,4,31,
-        5,19,24,8,8,
-        15,29,11,9,14
-    };
-    int side = 5;
-    int elems = side*side;
-    mtx::Matrix<double> data_matrix(side,side);
-    for (int i = 0; i < elems; ++i)
-        data_matrix[i] = covariance_samples[i];
-
-    state::StateVector<double> mean_vector(side);
-    data_matrix.mean(mean_vector);
-    mtx::Matrix<double> covariance_matrix(side,side);
-    data_matrix.covariance(covariance_matrix,mean_vector);
-
-    mtx::Matrix<double> cholesky_matrix(side,side);
-    covariance_matrix.cholesky(cholesky_matrix);
-
-    printMatrix("Original Matrix",data_matrix);
-    printVector("Mean Vector",mean_vector);
-    printMatrix("Covariance Matrix",covariance_matrix);
-    printMatrix("Cholesky Matrix",cholesky_matrix);
-
-}
-
-
-
-void testMatrixB() {
-
-    int cols = 5;
-    std::vector<double> state_samples = {5,2,8,1,6};
-    state::StateVector<double> state(cols);
-    for (int i = 0; i < cols; ++i)
-        state[i] = state_samples[i];
-
-    std::vector<double> matrix_samples = { 3,4,7,2,9,6,8,4,3,1,7,9,8,2,5 };
-    int vars = static_cast<int>(matrix_samples.size());
-    int rows = vars/cols;
-    mtx::Matrix<double> matrix(rows,cols);
-    matrix.init(rows,cols);
-    for (int i = 0; i < vars; ++i)
-        matrix[i] = matrix_samples[i];
-
-    state::StateVector<double> copied_state(cols);
-    state.replicate(copied_state);
-
-    printVector("Original Vector",state);
-    printVector("Copied Vector",copied_state);
-    printMatrix("Original Matrix",matrix);
-    matrix.addVectorMatrixRow(state,1);
-    matrix.mean(copied_state);
-    printVector("Added Vector",state);
-    printVector("Copied Mean Vector",copied_state);
-    matrix.subVectorMatrixRow(copied_state,0);
-    printVector("Copied Mean Sub Vector",copied_state);
-
-    mtx::Matrix<double> copied_matrix(rows,cols);
-    matrix.replicate(copied_matrix);
-    printMatrix("Copied Matrix",copied_matrix);
-
-    matrix.transpose(copied_matrix);
-    printMatrix("Copied Transpose Matrix",copied_matrix);
-
-    state::StateVector<double> mean_state(copied_matrix.getCols());
-    copied_matrix.mean(mean_state);
-    printVector("Copied Mean Vector",mean_state);
-
-    copied_matrix.init(matrix.getRows(),matrix.getCols());
-    printMatrix("Reinitialized Matrix",copied_matrix);
-
-}
-
-
-void testInverseA() {
-
-    int N = 5;
-
-    state::StateVector<int> permutation(N);
-    mtx::Matrix<double> matrix(N,N);
-    mtx::Matrix<double> inverse(N,N);
-
-    placeElementsA(matrix);
-
-    for (int i = 0; i < matrix.getSize(); ++i)
-        inverse[i] = matrix[i];
-
-    inverse.LUPdecompose(permutation);
-    matrix.print();
-
-    state::StateVector<double> X(N);
-    state::StateVector<double> Y(N);
-    mtx::Matrix<double> intermediate(N,N);
-
-    inverse.LUPinverse(intermediate,permutation,X,Y);
-
-    inverse.print();
-
-}
-
-
 void testCalculatorA() {
 
     int row = 3, col = 4;
@@ -367,21 +262,23 @@ void testCalculatorF() {
 }
 
 
-void testCalculatorDecomposeA() {
+void testCalculatorInverseA() {
 
     int dim = 5;
     calc::Calculator<double> calc(dim);
-    mtx::Matrix<double> matrix(dim,dim);
-    state::StateVector<int> permutation(dim);
-    placeElementsA(matrix);
 
-    matrix.print();
-    calc.LUPdecompose(matrix);
-    matrix.print();
+    mtx::Matrix<double> a(dim,dim);
+    mtx::Matrix<double> b(dim,dim);
+    mtx::Matrix<double> c(dim,dim);
+    placeElementsA(a);
+    c = a;
 
-    //matrix.print();
-    //matrix.LUPdecompose(permutation);
-    //matrix.print();
+    calc.inverse(b,a);
+    calc.inverse(c);
+
+    a.print();
+    b.print();
+    c.print();
 
 }
 
@@ -391,8 +288,7 @@ int main(int argc, char* argv[]) {
 
     auto start = std::chrono::system_clock::now();
 
-    //testCalculatorDecomposeA();
-    testCalculatorF();
+    testCalculatorInverseA();
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
