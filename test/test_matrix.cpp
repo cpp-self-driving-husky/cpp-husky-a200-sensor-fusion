@@ -205,9 +205,8 @@ void testCalculatorB() {
     mtx::Matrix<double> cholesky(vars,vars);
     placeCovarianceB(data);
 
-    data.covariance(matrix,state);
-
     calc::Calculator<double> calc(vars);
+    calc.covariance(matrix,data,state);
     calc.cholesky(cholesky,matrix);
 
     matrix.print();
@@ -227,18 +226,17 @@ void testCalculatorC() {
     };
     int side = 5;
     int elems = side*side;
+    calc::Calculator<double> calc(side);
+
     mtx::Matrix<double> data_matrix(side,side);
     for (int i = 0; i < elems; ++i)
         data_matrix[i] = covariance_samples[i];
 
     state::StateVector<double> mean_vector(side);
-    data_matrix.mean(mean_vector);
     mtx::Matrix<double> covariance_matrix(side,side);
-    data_matrix.covariance(covariance_matrix,mean_vector);
-
     mtx::Matrix<double> cholesky_matrix(side,side);
-
-    calc::Calculator<double> calc(side);
+    calc.mean(mean_vector,data_matrix);
+    calc.covariance(covariance_matrix,data_matrix,mean_vector);
     calc.cholesky(cholesky_matrix,covariance_matrix);
 
     covariance_matrix.print();
@@ -287,8 +285,8 @@ void testCalculatorF() {
     placeElementsA(data_matrix);
 
     calc.init(side);
+    calc.covariance(covariance,data_matrix,mean_vector);
 
-    data_matrix.covariance(covariance,mean_vector);
     covariance.print();
 
     calc.cholesky(cholesky,covariance);

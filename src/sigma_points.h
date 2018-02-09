@@ -15,101 +15,80 @@ namespace sigma {
     class SigmaPoints {
 
         public:
-            SigmaPoints(int state_size) :
-                points_(nullptr),
-                state_size_(state_size),
-                elements_(0)
+            SigmaPoints(int points,int vars) :
+                sigma_(nullptr),
+                points_(points),
+                vars_(vars)
             {
-                this->init(state_size);
+                this->init(points,vars);
             }
 
             ~SigmaPoints() {
                 this->destroy();
             }
 
-            void init(int state_size) {
+            void init(int points,int vars) {
                 this->destroy();
-                this->state_size_ = state_size;
-                this->elements_ = this->pointsPerState(this->state_size_);
-                this->points_ = new state::StateVector<T>[this->elements_];
-                for (int i = 0; i < this->elements_; ++i)
-                    this->points_[i].init(this->state_size_);
+                this->points_ = points;
+                this->vars_ = vars;
+                this->sigma_ = new state::StateVector<T>[this->points_];
+                for (int i = 0; i < this->points_; ++i)
+                    this->sigma_[i].init(this->vars_);
             }
 
             void destroy() {
-                if (this->points_ != nullptr) {
-                    delete[] this->points_;
-                    this->points_ = nullptr;
+                if (this->sigma_ != nullptr) {
+                    delete[] this->sigma_;
+                    this->sigma_ = nullptr;
                 }
-                this->state_size_ = this->elements_ = 0;
+                this->points_ = this->vars_ = 0;
             }
 
             void generatePoints(
-                state::StateVector<T>& state,
-                mtx::CovarianceMatrix<T>& covariance_matrix,
-                mtx::Matrix<T>& cholesky_matrix,
-                double gamma)
+                state::StateVector<T>& mean,
+                mtx::Matrix<T>& cholesky,
+                T gamma)
             {
-                covariance_matrix.cholesky(cholesky_matrix);
-                cholesky_matrix *= gamma;
-                int vars = state.getVars();
-                for (int n = 0; n < this->elements_; ++n)
-                    for (int i = 0; i < vars; ++i)
-                        this->points_[n][i] = state[i];
-                int offset = 1;
-                for (int n = offset; n < this->state_size_+1; ++n)
-                    cholesky_matrix.addVectorMatrixRow(this->points_[n],n-offset);
-                offset = this->state_size_+1;
-                for (int n = offset; n < this->elements_; ++n)
-                    cholesky_matrix.subVectorMatrixRow(this->points_[n],n-offset);
+                int i = 0;
+                this->sigma_[i++] = mean;
+                this->generatePoints(mean,cholesky,gamma,i,this->vars_+1);
+                this->generatePoints(mean,cholesky,-gamma,i,this->points_);
             }
 
-            /*
-            // TODO test this!
-            void sumWeighedState(
-                state::StateVector<T>& state,
-                state::WeightVector<T>& weights)
+            void generatePoints(
+                state::StateVector<T>& mean,
+                mtx::Matrix<T>& cholesky,
+                T coef, int& i, int bound)
             {
-                state.zero();
-                int state_size = state.getVars();
-                for (int i = 0; i < this->elements_; ++i)
-                    for (int j = 0; j < state_size; ++j)
-                        state[j] += this->points_[i][j] * weights[i];
-            }
-            */
-
-            T calculateLambda(double alpha, double kappa) {
-                return this->points_[0].calculateLambda(alpha,kappa);
-            }
-
-            T calculateGamma(double alpha, double kappa) {
-                return this->points_[0].calculateGamma(alpha,kappa);
-            }
-
-            int pointsPerState(int state_size) {
-                return state_size*2+1;
+                int row = cholesky.getRows(),
+                    col = cholesky.getCols();
+                while (i < bound) {
+                    for (int j = 0; j < this->vars_; ++j)
+                        this->sigma_[i][j] = mean[j]+coef*cholesky[j*row+(i-1)%col];
+                    ++i;
+                }
             }
 
             state::StateVector<T>& operator[](int i) {
-                return this->points_[i];
+                return this->sigma_[i];
             }
 
-            int getSize() {
-                return this->elements_;
+            int getNumPoints() {
+                return this->points_;
             }
 
             int getStateSize() {
-                return this->state_size_;
+                return this->vars_;
             }
 
-
+            // TODO remove; for debugging purposes
             void print() {
-                int num_points = this->elements_;
-                int vars = this->state_size_;
+                int num_points = this->points_;
+                int vars = this->vars_;
                 for (int n = 0; n < num_points; ++n) {
                     std::cout << n+1 << ": ";
                     for (int i = 0; i < vars; ++i) {
-                        std::cout << this->points_[n][i] << " ";
+                        std::cout << this->sigma_[n][i] << " ";
                     }
                     std::cout << "\n";
                 }
@@ -119,14 +98,14 @@ namespace sigma {
 
 
         private:
-            state::StateVector<T>* points_;
-            int state_size_;
-            int elements_;
-
+            state::StateVector<T>* sigma_;
+            int points_;
+            int vars_;
 
     };
 
 }
+
 
 #endif // SIGMA_POINTS_H_
 
