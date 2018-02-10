@@ -31,6 +31,7 @@ namespace ukf {
 
                 covar_belief_(mtx::Matrix<T>(vars,vars)),
                 covar_obser_(mtx::Matrix<T>(vars,vars)),
+                covar_obser_inv_(mtx::Matrix<T>(vars,vars)),
                 covar_cross_(mtx::Matrix<T>(vars,vars)),
 
                 sigma_belief_(this->pointsPerState(vars),vars),
@@ -41,6 +42,7 @@ namespace ukf {
 
                 noise_r_(mtx::Matrix<T>(vars,vars)),
                 noise_q_(mtx::Matrix<T>(vars,vars)),
+                kalman_gain_(mtx::Matrix<T>(vars,vars)),
 
                 place_holder_(state::StateVector<T>(vars))
             {}
@@ -59,7 +61,6 @@ namespace ukf {
             void destroy() {
                 this->deallocateModel(this->motion_model_);
                 this->deallocateModel(this->sensor_model_);
-
             }
 
             template<typename S>
@@ -91,7 +92,6 @@ namespace ukf {
             int pointsPerState(int state) {
                 return 2*state+1;
             }
-
 
 
             void sigmaPoints(
@@ -172,9 +172,42 @@ namespace ukf {
                                 (sigma_z[k][j]-state_b[j]);
             }
 
+            void kalmanGain(
+                mtx::Matrix<T>& gain,
+                mtx::Matrix<T>& covar,
+                mtx::Matrix<T>& obser,
+                mtx::Matrix<T>& inv)
+            {
+                this->compute_.inverse(inv,obser);
+                this->compute_.multiply(gain,covar,inv);
+            }
 
+            void updateState(
+                state::StateVector<T>& state,
+                state::StateVector<T>& prev,
+                state::StateVector<T>& meas,
+                state::StateVector<T>& obser,
+                mtx::Matrix<T>& gain)
+            {
+                state.zero();
+                int row = gain.getRows(),
+                    col = gain.getCols();
+                for (int i = 0; i < row; ++i) {
+                    for (int j = 0; j < col; ++j)
+                        state[i] += gain[i*col+j] * (meas[i]-obser[i]);
+                    state[i] += prev[i];
+                }
+            }
 
-
+            void updateCovariance(
+                mtx::Matrix<T>& covar,
+                mtx::Matrix<T>& belief,
+                mtx::Matrix<T>& gain,
+                mtx::Matrix<T>& obser)
+            {
+                this->compute_.multiplyABAt(covar,gain,obser);
+                this->compute_.subtract(covar,belief,covar);
+            }
 
             void update(
                 state::StateVector<T>& state,
@@ -217,10 +250,29 @@ namespace ukf {
                     this->state_belief_,
                     this->covar_weight_,
                     this->noise_q_);
-
-
-
-
+                this->sumWeightedCovariance(
+                    this->covar_cross_,
+                    this->sigma_belief_,
+                    this->state_belief_,
+                    this->sigma_predict_,
+                    this->state_obser_,
+                    this->covar_weight_);
+                this->kalmanGain(
+                    this->kalman_gain_,
+                    this->covar_cross_,
+                    this->covar_obser_,
+                    this->covar_obser_inv_);
+                this->updateState(
+                    state,
+                    this->state_belief_,
+                    measurement,
+                    this->state_obser_,
+                    this->kalman_gain_);
+                this->updateCovariance(
+                    covariance,
+                    this->covar_belief_,
+                    this->kalman_gain_,
+                    this->covar_obser_);
             }
 
 
@@ -235,6 +287,7 @@ namespace ukf {
 
             mtx::Matrix<T> covar_belief_;
             mtx::Matrix<T> covar_obser_;
+            mtx::Matrix<T> covar_obser_inv_;
             mtx::Matrix<T> covar_cross_;
 
             sigma::SigmaPoints<T> sigma_belief_;
@@ -245,12 +298,12 @@ namespace ukf {
 
             mtx::Matrix<T> noise_r_;
             mtx::Matrix<T> noise_q_;
+            mtx::Matrix<T> kalman_gain_;
 
             T lambda_;
             T gamma_;
             int vars_;
             int points_;
-
 
 
             state::StateVector<T> place_holder_;

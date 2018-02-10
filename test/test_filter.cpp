@@ -1,7 +1,8 @@
 #include<iostream>
 #include<string>
 #include<vector>
-
+#include <chrono>
+#include <ctime>
 #include "../src/ukf.h"
 
 
@@ -90,32 +91,49 @@ void testWeightedCovarianceA() {
 }
 
 
-
-void testFilterA() {
-
-    int vars = 5;
+ukf::UnscentedKalmanFilter<double> initialize(int vars) {
     ukf::UnscentedKalmanFilter<double> ukf(vars);
+    return ukf;
+}
+
+
+void testFilterA(int vars, ukf::UnscentedKalmanFilter<double>& ukf) {
 
     state::StateVector<double> state(vars);
     mtx::Matrix<double> covariance(vars,vars);
     state::StateVector<double> control(vars);
     state::StateVector<double> measure(vars);
 
-    model::MotionModel<double>* motion_model = new model::SimpleMotionModel<double>();
-    sensor::SensorModel<double>* sensor_model = new sensor::SimpleSensorModel<double>();
+    model::MotionModel<double>* motion_model =
+        new model::SimpleMotionModel<double>();
+    sensor::SensorModel<double>* sensor_model =
+        new sensor::SimpleSensorModel<double>();
 
     ukf.setMotionModel(motion_model);
     ukf.setSensorModel(sensor_model);
 
-
-    ukf.update(state,covariance,control,measure);
+    for (int i = 0; i < 10; ++i)
+        ukf.update(state,covariance,control,measure);
 
 }
 
 
 
 int main(int argc, char* argv[]) {
-    testFilterA();
+
+    int vars = 500;
+    ukf::UnscentedKalmanFilter<double> ukf = initialize(vars);
+
+    auto start = std::chrono::system_clock::now();
+
+    testFilterA(vars,ukf);
+
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+    std::cout << "\n" << "finished computation at " << std::ctime(&end_time)
+              << "elapsed time: " << elapsed_seconds.count() << "s" << "\n\n";
+
     return 0;
 }
 

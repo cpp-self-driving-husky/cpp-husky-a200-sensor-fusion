@@ -146,6 +146,12 @@ namespace calc {
                 trans.swapDimensions();
             }
 
+            void subtract(mtx::Matrix<T>& P, mtx::Matrix<T>& A, mtx::Matrix<T>& B) {
+                int len = P.getSize();
+                for (int i = 0; i < len; ++i)
+                    P[i] = A[i] - B[i];
+            }
+
             void multiply(mtx::Matrix<T>& P,mtx::Matrix<T>& A,mtx::Matrix<T>& B) {
                 P.zero();
                 int rows = A.getRows(),
@@ -155,6 +161,22 @@ namespace calc {
                     for (int j = 0; j < cols; ++j)
                         for (int k = 0; k < inner; ++k)
                             P[i*cols+j] += A[i*inner+k] * B[k*cols+j];
+            }
+
+            void multiplyABt(mtx::Matrix<T>& P,mtx::Matrix<T>& A,mtx::Matrix<T>& B) {
+                P.zero();
+                int rows = A.getRows(),
+                    inner = A.getCols(),
+                    cols = B.getCols();
+                for (int i = 0; i < rows; ++i)
+                    for (int j = 0; j < cols; ++j)
+                        for (int k = 0; k < inner; ++k)
+                            P[i*cols+j] += A[i*inner+k] * B[j*cols+k];
+            }
+
+            void multiplyABAt(mtx::Matrix<T>& P,mtx::Matrix<T>& A,mtx::Matrix<T>& B) {
+                this->multiply(this->square_,A,B);
+                this->multiplyABt(P,this->square_,A);
             }
 
             void cholesky(mtx::Matrix<T>& L) {
