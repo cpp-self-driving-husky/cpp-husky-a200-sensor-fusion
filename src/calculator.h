@@ -102,32 +102,37 @@ namespace calc {
 
             void mean(state::StateVector<T>& state, mtx::Matrix<T>& data) {
                 int vars = state.getVars();
+                int obser = data.getRows();
                 for (int v = 0; v < vars; ++v) {
                     state[v] = 0.0;
-                    for (int m = 0; m < data.getRows(); ++m)
+                    for (int m = 0; m < obser; ++m)
                         state[v] += data[vars*m+v];
-                    state[v] /= data.getRows();
+                    state[v] /= obser;
                 }
             }
+
 
             void covariance(
                 mtx::Matrix<T>& cov,
                 mtx::Matrix<T>& data,
                 state::StateVector<T>& mean)
             {
-                int meas = data.getRows(),
+                int obser = data.getRows(),
                     vars = data.getCols(),
-                    dim = cov.getRows();
-                for (int i = 0; i < dim; ++i) {
-                    for (int j = i; j < dim; ++j) {
+                    rows = cov.getRows(),
+                    cols = cov.getCols();
+
+                for (int i = 0; i < vars; ++i) {
+                    for (int j = i; j < vars; ++j) {
                         T variance = 0.0;
-                        for (int k = 0; k < meas; ++k)
+                        for (int k = 0; k < obser; ++k) {
                             variance +=
-                                (data[k*vars+j]-mean[i]) *
-                                (data[k*vars+i]-mean[j]);
-                        variance /= (meas-1);
-                        cov[i*dim+j] = variance;
-                        cov[j*dim+i] = variance;
+                                (data[k*vars+i]-mean[i]) *
+                                (data[k*vars+j]-mean[j]);
+                        }
+                        variance /= obser-1;
+                        cov[i*cols+j] = variance;
+                        cov[j*rows+i] = variance;
                     }
                 }
             }
