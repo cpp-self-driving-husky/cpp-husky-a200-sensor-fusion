@@ -83,7 +83,7 @@ void testWeightedCovarianceA() {
 
     covariance.print();
     sigma.print();
-    filter.sumWeightedCovariance(covariance,weight,sigma,state,noise);
+    filter.sumWeightedCovariance(covariance,sigma,state,weight,noise);
     covariance.print();
 
 
@@ -93,14 +93,29 @@ void testWeightedCovarianceA() {
 
 void testFilterA() {
 
+    int vars = 5;
+    ukf::UnscentedKalmanFilter<double> ukf(vars);
 
+    state::StateVector<double> state(vars);
+    mtx::Matrix<double> covariance(vars,vars);
+    state::StateVector<double> control(vars);
+    state::StateVector<double> measure(vars);
+
+    model::MotionModel<double>* motion_model = new model::SimpleMotionModel<double>();
+    sensor::SensorModel<double>* sensor_model = new sensor::SimpleSensorModel<double>();
+
+    ukf.setMotionModel(motion_model);
+    ukf.setSensorModel(sensor_model);
+
+
+    ukf.update(state,covariance,control,measure);
 
 }
 
 
 
 int main(int argc, char* argv[]) {
-    testWeightedCovarianceA();
+    testFilterA();
     return 0;
 }
 

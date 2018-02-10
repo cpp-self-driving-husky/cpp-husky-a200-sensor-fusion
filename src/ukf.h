@@ -27,7 +27,11 @@ namespace ukf {
                 compute_(calc::Calculator<T>(vars)),
 
                 state_belief_(state::StateVector<T>(vars)),
+                state_obser_(state::StateVector<T>(vars)),
+
                 covar_belief_(mtx::Matrix<T>(vars,vars)),
+                covar_obser_(mtx::Matrix<T>(vars,vars)),
+                covar_cross_(mtx::Matrix<T>(vars,vars)),
 
                 sigma_belief_(this->pointsPerState(vars),vars),
                 sigma_predict_(this->pointsPerState(vars),vars),
@@ -112,14 +116,11 @@ namespace ukf {
                         control,this->place_holder_);
             }
 
-
             void hFunction(
                 sigma::SigmaPoints<T>& predict,
                 sigma::SigmaPoints<T>& belief)
             {
-                int points = predict.getNumPoints();
-                for (int i = 0; i < points; ++i)
-                    this->sensor_model_->calculate(predict[i],belief[i]);
+                this->sensor_model_->calculate(predict,belief);
             }
 
             void sumWeightedMean(
@@ -136,24 +137,39 @@ namespace ukf {
             }
 
             void sumWeightedCovariance(
-                mtx::Matrix<double>& covariance,
-                sigma::SigmaPoints<double>& sigma,
-                state::StateVector<double>& belief,
-                state::WeightVector<double>& weight,
-                mtx::Matrix<double>& noise)
+                mtx::Matrix<T>& covariance,
+                sigma::SigmaPoints<T>& sigma,
+                state::StateVector<T>& belief,
+                state::WeightVector<T>& weight,
+                mtx::Matrix<T>& noise)
+            {
+                this->sumWeightedCovariance(
+                    covariance,
+                    sigma,belief,
+                    sigma,belief,
+                    weight);
+                covariance += noise;
+            }
+
+            void sumWeightedCovariance(
+                mtx::Matrix<T>& covariance,
+                sigma::SigmaPoints<T>& sigma_x,
+                state::StateVector<T>& state_a,
+                sigma::SigmaPoints<T>& sigma_z,
+                state::StateVector<T>& state_b,
+                state::WeightVector<T>& weight)
             {
                 covariance.zero();
-                int rows = sigma.getStateSize(),
-                    inner = sigma.getNumPoints(),
-                    cols = sigma.getStateSize();
+                int rows = sigma_x.getStateSize(),
+                    inner = sigma_x.getNumPoints(),
+                    cols = sigma_z.getStateSize();
                 for (int i = 0; i < rows; ++i)
                     for (int j = 0; j < cols; ++j)
                         for (int k = 0; k < inner; ++k)
                             covariance[i*cols+j] +=
                                 weight[k] *
-                                (sigma[k][i]-belief[i]) *
-                                (sigma[k][j]-belief[j]) +
-                                noise[i*cols+j];
+                                (sigma_x[k][i]-state_a[i]) *
+                                (sigma_z[k][j]-state_b[j]);
             }
 
 
@@ -178,7 +194,7 @@ namespace ukf {
                     this->sigma_predict_,
                     this->mean_weight_);
                 this->sumWeightedCovariance(
-                    this->covariance_belief_,
+                    this->covar_belief_,
                     this->sigma_predict_,
                     this->state_belief_,
                     this->covar_weight_,
@@ -186,18 +202,17 @@ namespace ukf {
                 this->sigmaPoints(
                     this->sigma_belief_,
                     this->state_belief_,
-                    this->covariance_belief_,
+                    this->covar_belief_,
                     this->gamma_);
                 this->hFunction(
                     this->sigma_predict_,
                     this->sigma_belief_);
                 this->sumWeightedMean(
-                    this->state_belief_,
+                    this->state_obser_,
                     this->sigma_predict_,
                     this->mean_weight_);
-
                 this->sumWeightedCovariance(
-                    this->covariance_belief_,
+                    this->covar_obser_,
                     this->sigma_predict_,
                     this->state_belief_,
                     this->covar_weight_,
@@ -216,7 +231,11 @@ namespace ukf {
             sensor::SensorModel<T>* sensor_model_;
 
             state::StateVector<T> state_belief_;
+            state::StateVector<T> state_obser_;
+
             mtx::Matrix<T> covar_belief_;
+            mtx::Matrix<T> covar_obser_;
+            mtx::Matrix<T> covar_cross_;
 
             sigma::SigmaPoints<T> sigma_belief_;
             sigma::SigmaPoints<T> sigma_predict_;

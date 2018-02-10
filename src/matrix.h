@@ -71,9 +71,15 @@ namespace mtx {
             }
 
             void operator+=(mtx::Matrix<T>& matrix) {
-                int elems = this->rows_*this->cols_;
+                int elems = this->getSize();
                 for (int i = 0; i < elems; ++i)
-                    this->matrix_[i] += matrix.matrix_[i];
+                    this->matrix_[i] += matrix[i];
+            }
+
+            void operator-=(mtx::Matrix<T>& matrix) {
+                int elems = this->getSize();
+                for (int i = 0; i < elems; ++i)
+                    this->matrix_[i] -= matrix[i];
             }
 
             void operator*=(T scalar) {
