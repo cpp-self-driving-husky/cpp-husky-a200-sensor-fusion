@@ -209,47 +209,76 @@ namespace ukf {
                 this->compute_.subtract(covar,belief,covar);
             }
 
+
             void update(
                 state::StateVector<T>& state,
                 mtx::CovarianceMatrix<T>& covariance,
                 state::ControlVector<T>& control,
                 state::MeasurementVector<T>& measurement)
             {
+
+                //state.print();
+
                 this->sigmaPoints(
                     this->sigma_belief_,state,
                     covariance,this->gamma_);
+
+                this->sigma_belief_.print();
+
                 this->gFunction(
                     this->sigma_predict_,
                     this->sigma_belief_,
                     control);
+
+                //this->sigma_predict_.print();
+
+
                 this->sumWeightedMean(
                     this->state_belief_,
                     this->sigma_predict_,
                     this->mean_weight_);
+
+                //this->state_belief_.print();
+
                 this->sumWeightedCovariance(
                     this->covar_belief_,
                     this->sigma_predict_,
                     this->state_belief_,
                     this->covar_weight_,
                     this->noise_r_);
+
+                //this->covar_belief_.print();
+
                 this->sigmaPoints(
                     this->sigma_belief_,
                     this->state_belief_,
                     this->covar_belief_,
                     this->gamma_);
+
+                //this->sigma_belief_.print();
+
                 this->hFunction(
                     this->sigma_predict_,
                     this->sigma_belief_);
+
+                //this->sigma_predict_.print();
+
                 this->sumWeightedMean(
                     this->state_obser_,
                     this->sigma_predict_,
                     this->mean_weight_);
+
+                //this->state_obser_.print();
+
                 this->sumWeightedCovariance(
                     this->covar_obser_,
                     this->sigma_predict_,
                     this->state_belief_,
                     this->covar_weight_,
                     this->noise_q_);
+
+                //this->covar_obser_.print();
+
                 this->sumWeightedCovariance(
                     this->covar_cross_,
                     this->sigma_belief_,
@@ -257,22 +286,34 @@ namespace ukf {
                     this->sigma_predict_,
                     this->state_obser_,
                     this->covar_weight_);
+
+                //this->covar_cross_.print();
+
                 this->kalmanGain(
                     this->kalman_gain_,
                     this->covar_cross_,
                     this->covar_obser_,
                     this->covar_obser_inv_);
+
+                //this->kalman_gain_.print();
+
                 this->updateState(
                     state,
                     this->state_belief_,
                     measurement,
                     this->state_obser_,
                     this->kalman_gain_);
+
+                //state.print();
+
                 this->updateCovariance(
                     covariance,
                     this->covar_belief_,
                     this->kalman_gain_,
                     this->covar_obser_);
+
+                //covariance.print();
+
             }
 
 

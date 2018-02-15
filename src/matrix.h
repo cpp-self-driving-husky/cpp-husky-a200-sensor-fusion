@@ -15,31 +15,43 @@ namespace mtx {
     class Matrix {
 
         public:
-            Matrix(int rows, int cols) :
-                matrix_(nullptr), rows_(rows), cols_(cols)
+            Matrix(const int rows, const int cols) :
+                matrix_(nullptr),rows_(rows),cols_(cols)
             {
                 this->init(rows,cols);
+            }
+
+            Matrix(const Matrix<T>& M) :
+                matrix_(nullptr),rows_(0),cols_(0)
+             {
+                this->init(M.getRows(),M.getCols());
+                for (int i = 0; i < M.getSize(); ++i)
+                    this->matrix_[i] = M.matrix_[i];
             }
 
             ~Matrix() {
                 this->destroy();
             }
 
-            void init(int rows, int cols) {
+            void init(const int rows, const int cols) {
                 this->destroy();
                 this->rows_ = rows;
                 this->cols_ = cols;
                 int elem = this->rows_ * this->cols_;
                 this->matrix_ = new T[elem];
-                for (int i = 0; i < elem; ++i)
-                    this->matrix_[i] = 0.0;
+                this->zero();
             }
 
-            void replicate(Matrix& matrix) {
-                int elems = this->rows_*this->cols_;
-                for (int i = 0; i < elems; ++i)
-                    matrix[i] = this->matrix_[i];
+            void duplicate(const Matrix<T>& matrix) {
+                for (int i = 0; i < this->getSize(); ++i)
+                    this->matrix_[i] = matrix[i];
             }
+
+            //void replicate(Matrix<T>& matrix) {
+            //    int elems = this->rows_*this->cols_;
+            //    for (int i = 0; i < elems; ++i)
+            //        matrix[i] = this->matrix_[i];
+            //}
 
             void zero() {
                 int elems = this->rows_*this->cols_;
@@ -129,15 +141,15 @@ namespace mtx {
                 this->cols_ = cols;
             }
 
-            int getRows() {
+            const int getRows() const {
                 return this->rows_;
             }
 
-            int getCols() {
+            const int getCols() const {
                 return this->cols_;
             }
 
-            int getSize() {
+            const int getSize() const {
                 return this->rows_ * this->cols_;
             }
 
