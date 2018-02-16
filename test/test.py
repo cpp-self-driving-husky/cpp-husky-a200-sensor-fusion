@@ -1,3 +1,76 @@
+# testing filereader
+import numpy as np
+
+
+
+
+def populate(rows,cols,coef=10):
+	#return np.random.randint(10,size=(rows,cols))
+	return np.random.random(size=(rows,cols)) * coef
+
+	
+def stringify(elem):
+	flat = elem.flatten()
+	lst = [str(x) for x in flat.tolist()]
+	s = ','.join(lst)
+	return s
+	
+
+def prefix(mtx):
+	r,c = mtx.shape[0],mtx.shape[1]
+	return 'm/'+str(r)+'/'+str(c)+'/,'
+
+
+def write(path,elems):
+	with open(path,'wt') as f:
+		for i in range(0,len(elems),2):
+			Q = elems[i]
+			A = elems[i+1]
+			q = prefix(Q)+stringify(Q)+',\n'
+			a = prefix(A)+stringify(A)+',\n'
+			f.write(q)
+			f.write(a)
+			
+
+def covariance(data):
+	return np.cov(data,rowvar=False)
+
+
+def iter_covariance(row,col,elems):
+	data = populate(row,col)
+	cov = covariance(data)
+	elems.append(data)
+	elems.append(cov)
+
+
+def test_covariance():
+	covars = []
+	iter_covariance(9,5,covars)
+	iter_covariance(9,3,covars)
+	write('covariance.txt',covars)
+
+
+def driver():
+	test_covariance()
+
+	
+
+if __name__ == '__main__':
+	driver()
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 
 import numpy as np
 
@@ -5,7 +78,7 @@ import numpy as np
 
 
 def test_covariance():
-    '''
+    
     sample_a = np.array([
         [4.0, 2.0, 0.6],
         [4.2, 2.1, 0.59],
@@ -15,8 +88,8 @@ def test_covariance():
     ]).T
     cov = np.cov(sample_a)
     print(cov)
-    '''
-
+    
+    
     #A = np.array([[5, 0, 3, 7], [1, -5, 7, 3], [4, 9, 8, 10]]).T
     A = np.array([3, 6, 4])
     B = np.array([7,12, -9])
@@ -75,3 +148,5 @@ def driver():
 if __name__ == '__main__':
     driver()
 
+
+'''

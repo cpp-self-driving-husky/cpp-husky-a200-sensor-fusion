@@ -119,19 +119,27 @@ struct test {
             std::string line;
             std::vector<std::string> lines;
             if (file.is_open()) {
-                while (std::getline(file,line)) {
+                while (std::getline(file,line))
                     lines.push_back(line);
-                }
                 file.close();
             }
             return lines;
         }
 
 
+        static int getDimension(std::string& data, int index) {
+            int len = data.size(),
+                sum = 0;
+            for (int i = index; i < len && data[i] != '/'; ++i)
+                sum = sum*10 + data[i]-'0';
+            return sum;
+        }
+
+
         static mtx::Matrix<double> processMatrix(std::string& str) {
             int r = 2,c = 4;
-            int rows = str[r]-'0',
-                cols = str[c]-'0';
+            int rows = getDimension(str,r),
+                cols = getDimension(str,c);
             mtx::Matrix<double> matrix(rows,cols);
             std::vector<std::string> elements = split(str,',');
             elements.erase(elements.begin());
