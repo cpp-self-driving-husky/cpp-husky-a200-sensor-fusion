@@ -16,11 +16,31 @@
 
 
 namespace {
-    const double EPSILON = 0.0001;
+    const double EPSILON = 0.00000000001;
 }
 
 
+namespace Color {
+
+    enum Code {
+        FG_RED      = 31,
+        FG_GREEN    = 32,
+        FG_BLUE     = 34,
+        FG_DEFAULT  = 39,
+        BG_RED      = 41,
+        BG_GREEN    = 42,
+        BG_BLUE     = 44,
+        BG_DEFAULT  = 49
+    };
+
+    std::ostream& operator<<(std::ostream& os, Code code) {
+        return os << "\033[" << static_cast<int>(code) << "m";
+    }
+
+}
+
 typedef std::vector<std::pair<mtx::Matrix<double>,mtx::Matrix<double> > > MatrixPairs;
+
 
 
 struct test {
@@ -63,7 +83,7 @@ struct test {
         template<typename T>
         static void outline(T& a) {
             int w = 10;
-            int p = 5;
+            int p = 10;
             std::cout <<
                 std::setprecision(p) <<
                 std::setw(w) <<
@@ -75,6 +95,7 @@ struct test {
 
         template<typename T>
         static void console(mtx::Matrix<T>& res, mtx::Matrix<T>& ans) {
+            std::cout << &res << "\t" << &ans << "\n";
             int lr = res.getRows(), lc = res.getCols(),
                 rr = ans.getRows(), rc = ans.getCols();
             for (int i = 0; i < lr; ++i) {
@@ -90,14 +111,15 @@ struct test {
 
 
         static void successful() {
-            std::cout << "\n" <<
-                "Inputs are similar" << "\n\n";
+            std::cout << "\n" << Color::FG_GREEN <<
+                "Inputs are similar" << Color::FG_DEFAULT << "\n\n";
+
         }
 
 
         static void unsuccessful() {
-            std::cout << "\n"
-                "Inputs are not similar" << "\n\n";
+            std::cout << "\n" << Color::FG_RED <<
+                "Inputs are not similar" << Color::FG_DEFAULT << "\n\n";
         }
 
 
@@ -127,6 +149,9 @@ struct test {
         }
 
 
+        // TODO ensure that reading first digit
+        //      can occur regardless of size
+        //      of previous digit
         static int getDimension(std::string& data, int index) {
             int len = data.size(),
                 sum = 0;
@@ -144,12 +169,12 @@ struct test {
             std::vector<std::string> elements = split(str,',');
             elements.erase(elements.begin());
             for (int i = 0; i < elements.size(); ++i)
-                matrix[i] = atof(elements[i].c_str());
+                matrix[i] = stod(elements[i]);
             return matrix;
         }
 
 
-        static MatrixPairs procesMatrices(std::string filepath) {
+        static MatrixPairs processMatrices(std::string filepath) {
             std::vector<std::string> lines = readlines(filepath);
             MatrixPairs res;
             for (int i = 0; i < lines.size(); i += 2)
@@ -177,6 +202,10 @@ struct test {
             else
                 unsuccessful();
             console(res,ans);
+        }
+
+        static void trial(std::string msg) {
+            std::cout << "\n\n" << Color::FG_BLUE << msg << Color::FG_DEFAULT << "\n\n";
         }
 
 

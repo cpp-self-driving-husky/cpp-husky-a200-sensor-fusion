@@ -133,19 +133,11 @@ void testFilterB() {
 
     calc.mean(state,data);
     calc.covariance(covar,data,state);
-    state.print();
-    covar.print();
-
-    auto cholesky = mtrx(vars);
-    calc.cholesky(cholesky,covar);
-
-    cholesky.print();
-
 
     //state.print();
     //covar.print();
 
-    //ukf.update(state,covar,control,measure);
+    ukf.update(state,covar,control,measure);
 
     //state.print();
     //covar.print();

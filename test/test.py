@@ -1,11 +1,12 @@
 # testing filereader
 import numpy as np
+import scipy
+import scipy.linalg
 
 
 
 
 def populate(rows,cols,coef=10):
-	#return np.random.randint(10,size=(rows,cols))
 	return np.random.random(size=(rows,cols)) * coef
 
 	
@@ -36,117 +37,66 @@ def covariance(data):
 	return np.cov(data,rowvar=False)
 
 
-def iter_covariance(row,col,elems):
-	data = populate(row,col)
+def cholesky(data):
 	cov = covariance(data)
+	return np.linalg.cholesky(cov)
+
+
+def LUP(data):
+	lup = scipy.linalg.lu(data)
+	return np.array(lup)
+
+
+def inverse(data):
+	return np.linalg.inv(data)
+
+
+def execute(row,col,calc,elems):
+	data = populate(row,col)
+	res = calc(data)
 	elems.append(data)
-	elems.append(cov)
+	elems.append(res)
+	return data, res
 
 
 def test_covariance():
 	covars = []
-	iter_covariance(9,5,covars)
-	iter_covariance(9,3,covars)
-	write('covariance.txt',covars)
+	execute(9,5,covariance,covars)
+	execute(9,3,covariance,covars)
+	write('data/covariance.txt',covars)
+
+
+def test_cholesky():
+	chols = []
+	execute(5,5,cholesky,chols)
+	execute(7,7,cholesky,chols)
+	write('data/cholesky.txt',chols)
+
+
+def test_LUP():
+	decomp = []
+	execute(5,5,LUP,decomp)
+	execute(7,7,LUP,decomp)
+	write('data/lup.txt',decomp)
+
+
+def test_inverse():
+	inv = []
+	execute(5,5,inverse,inv)
+	execute(7,7,inverse,inv)
+	write('data/inverse.txt',inv)
 
 
 def driver():
-	test_covariance()
-
+	#test_covariance()
+	#test_cholesky()
+	#test_LUP()
+	test_inverse()
 	
 
 if __name__ == '__main__':
 	driver()
 
 
+# end of file
 
-
-
-
-
-
-
-
-
-
-
-'''
-
-import numpy as np
-
-
-
-
-def test_covariance():
-    
-    sample_a = np.array([
-        [4.0, 2.0, 0.6],
-        [4.2, 2.1, 0.59],
-        [3.9, 2.0, 0.58],
-        [4.3, 2.1, 0.62],
-        [4.1, 2.2, 0.63]
-    ]).T
-    cov = np.cov(sample_a)
-    print(cov)
-    
-    
-    #A = np.array([[5, 0, 3, 7], [1, -5, 7, 3], [4, 9, 8, 10]]).T
-    A = np.array([3, 6, 4])
-    B = np.array([7,12, -9])
-    C = np.array([A,B])
-
-    D = np.array([[2, 0, -9],[3, 4, 1]])
-    E = np.array([[5, 2, 6],[-4, 4, 9]])
-
-    F = np.array([2, 0, -9, 3, 4, 1])
-    G = np.array([5, 2, 6, -4, 4, 9])
-
-    H = np.array([[2,3],[0,4],[-9,1]])
-    I = np.array([[5,-4],[2,4],[6,9]])
-
-    J = np.array([[2,3],[0,4],[-9,1],[5,-4],[2,4],[6,9]])
-
-    K = np.array([2, 0, -9, 3, 4, 1, 4, 3, -5])
-    L = np.array([5, 2, 6, -4, 4, 9, -8, 4, 1])
-
-    M = np.array([ [2, 0, -9], [3, 4, 1], [4, 3, -5] ])
-    N = np.array([ [5, 2, 6], [-4, 4, 9], [-8, 4, 1] ])
-
-    O = np.array([ [2, 0, -9], [3, 4, 1],[4, 3, -5], [5, 2, 6], [-4, 4, 9], [-8, 4, 1] ])
-    
-
-    cov_a = np.cov(A)
-    cov_b = np.cov(B)
-    cov_ab = np.cov(A,B)
-    cov_c = np.cov(C)
-    cov_de = np.cov(D,E)
-    cov_fg = np.cov(F,G)
-    cov_hi = np.cov(H,I)
-    cov_h = np.cov(H)
-    cov_j = np.cov(J)
-    cov_lk = np.cov(K,L)
-    cov_mn = np.cov(M,N)
-    cov_m = np.cov(M)
-    cov_n = np.cov(N)
-    cov_o = np.cov(O)
-
-    print(M)
-    print(cov_m)
-
-    print(N)
-    print(cov_n)
-    
-    
-
-
-def driver():
-    test_covariance()
-
-
-
-
-if __name__ == '__main__':
-    driver()
-
-
-'''

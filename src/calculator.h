@@ -185,6 +185,9 @@ namespace calc {
                 this->cholesky(L,this->square_);
             }
 
+
+            // TODO there is some rounding error
+            //      which causes problems in calculation!
             void cholesky(mtx::Matrix<T>& L, mtx::Matrix<T>& A) {
                 L.zero();
                 int elems = L.getSize(),
