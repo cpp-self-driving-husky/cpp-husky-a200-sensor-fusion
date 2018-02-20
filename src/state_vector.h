@@ -1,7 +1,11 @@
 #ifndef STATE_VECTOR_H_
 #define STATE_VECTOR_H_
 #include <cmath>
+
+
+// for testing purposes
 #include <iostream>
+#include <iomanip>
 
 
 namespace state {
@@ -59,6 +63,13 @@ namespace state {
                 return this->vars_;
             }
 
+            void precisionPrint() {
+                int def_prec = 6,
+                    prec = 17;
+                std::cout << std::setprecision(prec);
+                this->print();
+                std::cout << std::setprecision(def_prec);
+            }
 
             void print() {
                 for (int i = 0; i < this->vars_; ++i)

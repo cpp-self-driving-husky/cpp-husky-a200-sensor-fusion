@@ -57,11 +57,6 @@ namespace ukf {
                 this->vars_ = vars;
                 this->lambda_ = this->calculateLambda(ALPHA,KAPPA,this->vars_);
                 this->gamma_ = this->calculateGamma(this->lambda_,this->vars_);
-
-                std::cout << "lambda " << this->lambda_ << std::endl;
-                std::cout << "gamma  " << this->gamma_ << std::endl;
-
-
                 this->points_ = this->pointsPerState(this->vars_);
                 this->mean_weight_.populateMean(this->lambda_);
                 this->covar_weight_.populateCovariance(this->lambda_,ALPHA,BETA);
@@ -90,6 +85,16 @@ namespace ukf {
                 this->sensor_model_ = sensor;
             }
 
+            void setNoiseR(mtx::Matrix<T>& noise) {
+                this.noise_r_.init(noise.getRows(),noise.getCols());
+                this->noise_r_ = noise;
+            }
+
+            void setNoiseQ(mtx::Matrix<T>& noise) {
+                this->noise_q_.init(noise.getRows(),noise.getCols());
+                this->noise_q_ = noise;
+            }
+
             T calculateLambda(T alpha, T kappa, int n) {
                 return std::pow(alpha,2)*(n+kappa)-n;
             }
@@ -102,7 +107,6 @@ namespace ukf {
                 return 2*state+1;
             }
 
-
             void sigmaPoints(
                 sigma::SigmaPoints<T>& sigma,
                 state::StateVector<T>& state,
@@ -110,7 +114,6 @@ namespace ukf {
                 T gamma)
             {
                 this->compute_.cholesky(covariance);
-
                 sigma.generatePoints(state,covariance,gamma);
             }
 
@@ -138,7 +141,6 @@ namespace ukf {
                 sigma::SigmaPoints<T>& sigma,
                 state::WeightVector<T>& weights)
             {
-                state.zero();
                 int points = sigma.getNumPoints(),
                     vars = sigma.getStateSize();
                 for (int i = 0; i < points; ++i)
@@ -241,15 +243,16 @@ namespace ukf {
                     this->sigma_predict_,
                     this->mean_weight_);
 
-
-
-
                 this->sumWeightedCovariance(
                     this->covar_belief_,
                     this->sigma_predict_,
                     this->state_belief_,
                     this->covar_weight_,
                     this->noise_r_);
+
+
+                /*
+
 
                 this->sigmaPoints(
                     this->sigma_belief_,
@@ -299,6 +302,9 @@ namespace ukf {
                     this->covar_belief_,
                     this->kalman_gain_,
                     this->covar_obser_);
+
+
+                */
 
 
             }
