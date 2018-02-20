@@ -206,6 +206,7 @@ namespace model {
                 //int vars = x_ti.getVars();
                 //for (int i = 0; i < vars; ++i)
                 //    x_tf[i] = x_ti[i] + u_tf[i];
+                x_tf = x_ti;
                 return 1.0;
             }
 

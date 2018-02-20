@@ -6,8 +6,6 @@
 #include "sensor_model.h"
 
 
-
-
 namespace ukf {
 
     namespace {
@@ -44,8 +42,12 @@ namespace ukf {
                 noise_q_(mtx::Matrix<T>(vars,vars)),
                 kalman_gain_(mtx::Matrix<T>(vars,vars)),
 
+                // TODO remove this, will be unnecessary
+                //      or replace with a motion vector
                 place_holder_(state::StateVector<T>(vars))
-            {}
+            {
+                this->init(vars);
+            }
 
             ~UnscentedKalmanFilter() {
                 this->destroy();
@@ -53,6 +55,13 @@ namespace ukf {
 
             void init(int vars) {
                 this->vars_ = vars;
+                this->lambda_ = this->calculateLambda(ALPHA,KAPPA,this->vars_);
+                this->gamma_ = this->calculateGamma(this->lambda_,this->vars_);
+
+                std::cout << "lambda " << this->lambda_ << std::endl;
+                std::cout << "gamma  " << this->gamma_ << std::endl;
+
+
                 this->points_ = this->pointsPerState(this->vars_);
                 this->mean_weight_.populateMean(this->lambda_);
                 this->covar_weight_.populateCovariance(this->lambda_,ALPHA,BETA);
@@ -101,6 +110,7 @@ namespace ukf {
                 T gamma)
             {
                 this->compute_.cholesky(covariance);
+
                 sigma.generatePoints(state,covariance,gamma);
             }
 
@@ -217,28 +227,22 @@ namespace ukf {
                 state::MeasurementVector<T>& measurement)
             {
 
-                //state.print();
-
                 this->sigmaPoints(
                     this->sigma_belief_,state,
                     covariance,this->gamma_);
-
-                this->sigma_belief_.print();
 
                 this->gFunction(
                     this->sigma_predict_,
                     this->sigma_belief_,
                     control);
 
-                //this->sigma_predict_.print();
-
-
                 this->sumWeightedMean(
                     this->state_belief_,
                     this->sigma_predict_,
                     this->mean_weight_);
 
-                //this->state_belief_.print();
+
+
 
                 this->sumWeightedCovariance(
                     this->covar_belief_,
@@ -247,28 +251,20 @@ namespace ukf {
                     this->covar_weight_,
                     this->noise_r_);
 
-                //this->covar_belief_.print();
-
                 this->sigmaPoints(
                     this->sigma_belief_,
                     this->state_belief_,
                     this->covar_belief_,
                     this->gamma_);
 
-                //this->sigma_belief_.print();
-
                 this->hFunction(
                     this->sigma_predict_,
                     this->sigma_belief_);
-
-                //this->sigma_predict_.print();
 
                 this->sumWeightedMean(
                     this->state_obser_,
                     this->sigma_predict_,
                     this->mean_weight_);
-
-                //this->state_obser_.print();
 
                 this->sumWeightedCovariance(
                     this->covar_obser_,
@@ -276,8 +272,6 @@ namespace ukf {
                     this->state_belief_,
                     this->covar_weight_,
                     this->noise_q_);
-
-                //this->covar_obser_.print();
 
                 this->sumWeightedCovariance(
                     this->covar_cross_,
@@ -287,15 +281,11 @@ namespace ukf {
                     this->state_obser_,
                     this->covar_weight_);
 
-                //this->covar_cross_.print();
-
                 this->kalmanGain(
                     this->kalman_gain_,
                     this->covar_cross_,
                     this->covar_obser_,
                     this->covar_obser_inv_);
-
-                //this->kalman_gain_.print();
 
                 this->updateState(
                     state,
@@ -304,15 +294,12 @@ namespace ukf {
                     this->state_obser_,
                     this->kalman_gain_);
 
-                //state.print();
-
                 this->updateCovariance(
                     covariance,
                     this->covar_belief_,
                     this->kalman_gain_,
                     this->covar_obser_);
 
-                //covariance.print();
 
             }
 

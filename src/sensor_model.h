@@ -41,7 +41,9 @@ namespace sensor {
                 sigma::SigmaPoints<T>& observation,
                 sigma::SigmaPoints<T>& prediction)
             {
-
+                int points = prediction.getNumPoints();
+                for (int i = 0; i < points; ++i)
+                    observation[i] = prediction[i];
             }
 
 

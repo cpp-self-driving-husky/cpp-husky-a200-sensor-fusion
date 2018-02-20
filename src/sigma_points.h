@@ -62,8 +62,9 @@ namespace sigma {
                 int row = cholesky.getRows(),
                     col = cholesky.getCols();
                 while (i < bound) {
-                    for (int j = 0; j < this->vars_; ++j)
+                    for (int j = 0; j < this->vars_; ++j) {
                         this->sigma_[i][j] = mean[j]+coef*cholesky[j*row+(i-1)%col];
+                    }
                     ++i;
                 }
             }
