@@ -6,7 +6,8 @@
 
 // TODO remove inclusion
 //      test for printing
-#include<iostream>
+#include <iostream>
+#include <iomanip>
 
 
 namespace mtx {
@@ -151,6 +152,14 @@ namespace mtx {
 
             const int getSize() const {
                 return this->rows_ * this->cols_;
+            }
+
+            void precisionPrint() {
+                int def_prec = 6,
+                    prec = 17;
+                std::cout << std::setprecision(prec);
+                this->print();
+                std::cout << std::setprecision(def_prec);
             }
 
             // test function

@@ -6,6 +6,10 @@
 #include "sensor_model.h"
 
 
+// TODO remove!!!!
+#include "../test/utilitest.h"
+
+
 namespace ukf {
 
     namespace {
@@ -29,8 +33,10 @@ namespace ukf {
 
                 covar_belief_(mtx::Matrix<T>(vars,vars)),
                 covar_obser_(mtx::Matrix<T>(vars,vars)),
-                covar_obser_inv_(mtx::Matrix<T>(vars,vars)),
                 covar_cross_(mtx::Matrix<T>(vars,vars)),
+
+                covar_obser_inv_(mtx::Matrix<T>(vars,vars)),
+                covar_cholesky_(mtx::Matrix<T>(vars,vars)),
 
                 sigma_belief_(this->pointsPerState(vars),vars),
                 sigma_predict_(this->pointsPerState(vars),vars),
@@ -111,10 +117,11 @@ namespace ukf {
                 sigma::SigmaPoints<T>& sigma,
                 state::StateVector<T>& state,
                 mtx::Matrix<T>& covariance,
+                mtx::Matrix<T>& cholesky,
                 T gamma)
             {
-                this->compute_.cholesky(covariance);
-                sigma.generatePoints(state,covariance,gamma);
+                this->compute_.cholesky(cholesky,covariance);
+                sigma.generatePoints(state,cholesky,gamma);
             }
 
             void gFunction(
@@ -229,20 +236,37 @@ namespace ukf {
                 state::MeasurementVector<T>& measurement)
             {
 
+                std::cout << "1" << std::endl;
+                state.precisionPrint();
+
                 this->sigmaPoints(
-                    this->sigma_belief_,state,
-                    covariance,this->gamma_);
+                    this->sigma_belief_,
+                    state,
+                    covariance,
+                    this->covar_cholesky_,
+                    this->gamma_);
+
+                std::cout << "2" << std::endl;
+
 
                 this->gFunction(
                     this->sigma_predict_,
                     this->sigma_belief_,
                     control);
 
+                std::cout << "3" << std::endl;
+
+
                 this->sumWeightedMean(
                     this->state_belief_,
                     this->sigma_predict_,
                     this->mean_weight_);
 
+                std::cout << "4" << std::endl;
+                this->state_belief_.precisionPrint();
+
+
+                // TODO evaluate this in greater depth
                 this->sumWeightedCovariance(
                     this->covar_belief_,
                     this->sigma_predict_,
@@ -250,24 +274,35 @@ namespace ukf {
                     this->covar_weight_,
                     this->noise_r_);
 
-
-                /*
+                std::cout << "5" << std::endl;
+                this->covar_belief_.precisionPrint();
 
 
                 this->sigmaPoints(
                     this->sigma_belief_,
                     this->state_belief_,
                     this->covar_belief_,
+                    this->covar_cholesky_,
                     this->gamma_);
+
+                std::cout << "6" << std::endl;
+
 
                 this->hFunction(
                     this->sigma_predict_,
                     this->sigma_belief_);
 
+                std::cout << "7" << std::endl;
+
+
                 this->sumWeightedMean(
                     this->state_obser_,
                     this->sigma_predict_,
                     this->mean_weight_);
+
+                std::cout << "8" << std::endl;
+                this->state_obser_.precisionPrint();
+
 
                 this->sumWeightedCovariance(
                     this->covar_obser_,
@@ -275,6 +310,10 @@ namespace ukf {
                     this->state_belief_,
                     this->covar_weight_,
                     this->noise_q_);
+
+                std::cout << "9" << std::endl;
+                this->covar_obser_.precisionPrint();
+
 
                 this->sumWeightedCovariance(
                     this->covar_cross_,
@@ -284,11 +323,19 @@ namespace ukf {
                     this->state_obser_,
                     this->covar_weight_);
 
+                std::cout << "10" << std::endl;
+                this->covar_cross_.precisionPrint();
+
+
                 this->kalmanGain(
                     this->kalman_gain_,
                     this->covar_cross_,
                     this->covar_obser_,
                     this->covar_obser_inv_);
+
+                std::cout << "11" << std::endl;
+                this->kalman_gain_.precisionPrint();
+
 
                 this->updateState(
                     state,
@@ -297,14 +344,18 @@ namespace ukf {
                     this->state_obser_,
                     this->kalman_gain_);
 
+                std::cout << "12" << std::endl;
+                state.precisionPrint();
+
+
                 this->updateCovariance(
                     covariance,
                     this->covar_belief_,
                     this->kalman_gain_,
                     this->covar_obser_);
 
-
-                */
+                std::cout << "13" << std::endl;
+                covariance.precisionPrint();
 
 
             }
@@ -321,8 +372,10 @@ namespace ukf {
 
             mtx::Matrix<T> covar_belief_;
             mtx::Matrix<T> covar_obser_;
-            mtx::Matrix<T> covar_obser_inv_;
             mtx::Matrix<T> covar_cross_;
+
+            mtx::Matrix<T> covar_obser_inv_;
+            mtx::Matrix<T> covar_cholesky_;
 
             sigma::SigmaPoints<T> sigma_belief_;
             sigma::SigmaPoints<T> sigma_predict_;

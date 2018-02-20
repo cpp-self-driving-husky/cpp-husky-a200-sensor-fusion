@@ -5,7 +5,8 @@
 
 
 // include for testing
-#include<iostream>
+#include <iostream>
+#include <iomanip>
 
 
 namespace sigma {
@@ -94,6 +95,14 @@ namespace sigma {
                 }
                 std::cout << "size " << num_points << "\n";
                 std::cout << std::endl;
+            }
+
+            void precisionPrint() {
+                int def_prec = 6,
+                    prec = 17;
+                std::cout << std::setprecision(prec);
+                this->print();
+                std::cout << std::setprecision(def_prec);
             }
 
 
