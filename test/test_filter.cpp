@@ -34,6 +34,7 @@ void testUnscentedKalmanFilter() {
     state::StateVector<double> msr(vars);
 
     calc.mean(mean,data);
+    msr = mean;
     calc.covariance(cov,data,mean);
 
     //mean.print();
@@ -42,7 +43,7 @@ void testUnscentedKalmanFilter() {
     //msr.print();
 
     ukf.update(mean,cov,ctrl,msr);
-    ukf.update(mean,cov,ctrl,msr);
+    //ukf.update(mean,cov,ctrl,msr);
 
 
     /*
