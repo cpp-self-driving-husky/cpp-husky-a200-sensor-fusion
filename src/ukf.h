@@ -23,8 +23,10 @@ namespace ukf {
     class UnscentedKalmanFilter {
 
         public:
-            UnscentedKalmanFilter(int vars) :
-                vars_(0),points_(0),lambda_(0.0),gamma_(0.0),
+            UnscentedKalmanFilter(int vars, int measures) :
+                vars_(0),measures_(0),points_(0),
+                lambda_(0.0),gamma_(0.0),
+
                 motion_model_(nullptr),sensor_model_(nullptr),
                 compute_(calc::Calculator<T>(vars)),
 
@@ -52,18 +54,21 @@ namespace ukf {
                 //      or replace with a motion vector
                 place_holder_(state::StateVector<T>(vars))
             {
-                this->init(vars);
+                this->init(vars,measures);
             }
 
             ~UnscentedKalmanFilter() {
                 this->destroy();
             }
 
-            void init(int vars) {
+            void init(int vars, int measures) {
                 this->vars_ = vars;
+                this->measures_ = measures;
+                this->points_ = this->pointsPerState(this->vars_);
+
                 this->lambda_ = this->calculateLambda(ALPHA,KAPPA,this->vars_);
                 this->gamma_ = this->calculateGamma(this->lambda_,this->vars_);
-                this->points_ = this->pointsPerState(this->vars_);
+
                 this->mean_weight_.populateMean(this->lambda_);
                 this->covar_weight_.populateCovariance(this->lambda_,ALPHA,BETA);
             }
@@ -447,7 +452,10 @@ namespace ukf {
 
             T lambda_;
             T gamma_;
+
             int vars_;
+            int measures_;
+
             int points_;
 
 
