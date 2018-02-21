@@ -148,6 +148,7 @@ namespace ukf {
                 sigma::SigmaPoints<T>& sigma,
                 state::WeightVector<T>& weights)
             {
+                state.zero();
                 int points = sigma.getNumPoints(),
                     vars = sigma.getStateSize();
                 for (int i = 0; i < points; ++i)
@@ -237,8 +238,11 @@ namespace ukf {
             {
 
 
-                std::cout << "1" << std::endl;
-                state.precisionPrint();
+                //std::cout << "\n1\n" << std::endl;
+                //state.precisionPrint();
+                //covariance.precisionPrint();
+                //control.precisionPrint();
+                //measurement.precisionPrint();
 
 
                 this->sigmaPoints(
@@ -249,8 +253,12 @@ namespace ukf {
                     this->gamma_);
 
 
-                std::cout << "2" << std::endl;
-                this->sigma_belief_.precisionPrint();
+                //std::cout << "\n2\n" << std::endl;
+                //this->sigma_belief_.precisionPrint();
+                //state.precisionPrint();
+                //covariance.precisionPrint();
+                //this->covar_cholesky_.precisionPrint();
+                //std::cout << this->gamma_ << std::endl;
 
 
                 this->gFunction(
@@ -259,8 +267,10 @@ namespace ukf {
                     control);
 
 
-                std::cout << "3" << std::endl;
-                this->sigma_predict_.precisionPrint();
+                //std::cout << "\n3\n" << std::endl;
+                //this->sigma_predict_.precisionPrint();
+                //this->sigma_belief_.precisionPrint();
+                //control.precisionPrint();
 
 
                 this->sumWeightedMean(
@@ -269,8 +279,10 @@ namespace ukf {
                     this->mean_weight_);
 
 
-                std::cout << "4" << std::endl;
-                this->state_belief_.precisionPrint();
+                //std::cout << "\n4\n" << std::endl;
+                //this->state_belief_.precisionPrint();
+                //this->sigma_predict_.precisionPrint();
+                //this->mean_weight_.precisionPrint();
 
 
                 this->sumWeightedCovariance(
@@ -281,8 +293,12 @@ namespace ukf {
                     this->noise_r_);
 
 
-                std::cout << "5" << std::endl;
-                this->covar_belief_.precisionPrint();
+                //std::cout << "\n5\n" << std::endl;
+                //this->covar_belief_.precisionPrint();
+                //this->sigma_predict_.precisionPrint();
+                //this->state_belief_.precisionPrint();
+                //this->covar_weight_.precisionPrint();
+                //this->noise_r_.precisionPrint();
 
 
                 this->sigmaPoints(
@@ -292,8 +308,12 @@ namespace ukf {
                     this->covar_cholesky_,
                     this->gamma_);
 
-                std::cout << "6" << std::endl;
-                this->sigma_belief_.precisionPrint();
+                //std::cout << "\n6\n" << std::endl;
+                //this->sigma_belief_.precisionPrint();
+                //this->state_belief_.precisionPrint();
+                //this->covar_belief_.precisionPrint();
+                //this->covar_cholesky_.precisionPrint();
+                //std::cout << this->gamma_ << std::endl;
 
 
                 this->hFunction(
@@ -301,8 +321,9 @@ namespace ukf {
                     this->sigma_belief_);
 
 
-                std::cout << "7" << std::endl;
-                this->sigma_predict_.precisionPrint();
+                //std::cout << "\n7\n" << std::endl;
+                //this->sigma_predict_.precisionPrint();
+                //this->sigma_belief_.precisionPrint();
 
 
                 this->sumWeightedMean(
@@ -311,8 +332,10 @@ namespace ukf {
                     this->mean_weight_);
 
 
-                std::cout << "8" << std::endl;
-                this->state_obser_.precisionPrint();
+                //std::cout << "\n8\n" << std::endl;
+                //this->state_obser_.precisionPrint();
+                //this->sigma_predict_.precisionPrint();
+                //this->mean_weight_.precisionPrint();
 
 
                 this->sumWeightedCovariance(
@@ -323,8 +346,12 @@ namespace ukf {
                     this->noise_q_);
 
 
-                std::cout << "9" << std::endl;
-                this->covar_obser_.precisionPrint();
+                //std::cout << "\n9\n" << std::endl;
+                //this->covar_obser_.precisionPrint();
+                //this->sigma_predict_.precisionPrint();
+                //this->state_belief_.precisionPrint();
+                //this->covar_weight_.precisionPrint();
+                //this->noise_q_.precisionPrint();
 
 
                 this->sumWeightedCovariance(
@@ -336,8 +363,13 @@ namespace ukf {
                     this->covar_weight_);
 
 
-                std::cout << "10" << std::endl;
-                this->covar_cross_.precisionPrint();
+                //std::cout << "\n10\n" << std::endl;
+                //this->covar_cross_.precisionPrint();
+                //this->sigma_belief_.precisionPrint();
+                //this->state_belief_.precisionPrint();
+                //this->sigma_predict_.precisionPrint();
+                //this->state_obser_.precisionPrint();
+                //this->covar_weight_.precisionPrint();
 
 
                 this->kalmanGain(
@@ -347,8 +379,11 @@ namespace ukf {
                     this->covar_obser_inv_);
 
 
-                std::cout << "11" << std::endl;
-                this->kalman_gain_.precisionPrint();
+                //std::cout << "\n11\n" << std::endl;
+                //this->kalman_gain_.precisionPrint();
+                //this->covar_cross_.precisionPrint();
+                //this->covar_obser_.precisionPrint();
+                //this->covar_obser_inv_.precisionPrint();
 
 
                 this->updateState(
@@ -359,8 +394,12 @@ namespace ukf {
                     this->kalman_gain_);
 
 
-                std::cout << "12" << std::endl;
-                state.precisionPrint();
+                //std::cout << "\n12\n" << std::endl;
+                //state.precisionPrint();
+                //this->state_belief_.precisionPrint();
+                //measurement.precisionPrint();
+                //this->state_obser_.precisionPrint();
+                //this->kalman_gain_.precisionPrint();
 
 
                 this->updateCovariance(
@@ -370,8 +409,11 @@ namespace ukf {
                     this->covar_obser_);
 
 
-                std::cout << "13" << std::endl;
-                covariance.precisionPrint();
+                //std::cout << "\n13\n" << std::endl;
+                //covariance.precisionPrint();
+                //this->covar_belief_.precisionPrint();
+                //this->kalman_gain_.precisionPrint();
+                //this->covar_obser_.precisionPrint();
 
 
             }

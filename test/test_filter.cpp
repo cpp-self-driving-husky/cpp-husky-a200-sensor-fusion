@@ -37,13 +37,27 @@ void testUnscentedKalmanFilter() {
     msr = mean;
     calc.covariance(cov,data,mean);
 
-    //mean.print();
-    //cov.print();
-    //ctrl.print();
-    //msr.print();
 
-    ukf.update(mean,cov,ctrl,msr);
-    //ukf.update(mean,cov,ctrl,msr);
+    mean.precisionPrint();
+    cov.precisionPrint();
+
+
+    for (int i = 0; i < 1000; ++i) {
+
+        calc.covariance(cov,data,mean);
+        ukf.update(mean,cov,ctrl,msr);
+        std::cout << "iteration " << i << std::endl;
+        mean.precisionPrint();
+        //cov.precisionPrint();
+
+    }
+
+
+    mean.precisionPrint();
+    cov.precisionPrint();
+
+
+
 
 
     /*
