@@ -23,47 +23,48 @@ namespace ukf {
     class UnscentedKalmanFilter {
 
         public:
-            UnscentedKalmanFilter(int vars, int measures) :
+            UnscentedKalmanFilter(int vars, int meas) :
                 vars_(0),measures_(0),points_(0),
                 lambda_(0.0),gamma_(0.0),
 
+                compute_(calc::Calculator<T>(vars,meas)),
                 motion_model_(nullptr),sensor_model_(nullptr),
-                compute_(calc::Calculator<T>(vars)),
 
                 state_belief_(state::StateVector<T>(vars)),
-                state_obser_(state::StateVector<T>(vars)),
+                state_obser_(state::StateVector<T>(meas)),
 
                 covar_belief_(mtx::Matrix<T>(vars,vars)),
-                covar_obser_(mtx::Matrix<T>(vars,vars)),
-                covar_cross_(mtx::Matrix<T>(vars,vars)),
+                covar_obser_(mtx::Matrix<T>(meas,meas)),
+                covar_cross_(mtx::Matrix<T>(vars,meas)),
 
-                covar_obser_inv_(mtx::Matrix<T>(vars,vars)),
+                covar_obser_inv_(mtx::Matrix<T>(meas,meas)),
                 covar_cholesky_(mtx::Matrix<T>(vars,vars)),
 
                 sigma_belief_(this->pointsPerState(vars),vars),
                 sigma_predict_(this->pointsPerState(vars),vars),
+                sigma_obser_(this->pointsPerState(vars),meas),
 
                 mean_weight_(state::WeightVector<T>(vars,this->pointsPerState(vars))),
                 covar_weight_(state::WeightVector<T>(vars,this->pointsPerState(vars))),
 
                 noise_r_(mtx::Matrix<T>(vars,vars)),
-                noise_q_(mtx::Matrix<T>(vars,vars)),
-                kalman_gain_(mtx::Matrix<T>(vars,vars)),
+                noise_q_(mtx::Matrix<T>(meas,meas)),
+                kalman_gain_(mtx::Matrix<T>(vars,meas)),
 
                 // TODO remove this, will be unnecessary
                 //      or replace with a motion vector
                 place_holder_(state::StateVector<T>(vars))
             {
-                this->init(vars,measures);
+                this->init(vars,meas);
             }
 
             ~UnscentedKalmanFilter() {
                 this->destroy();
             }
 
-            void init(int vars, int measures) {
+            void init(int vars, int meas) {
                 this->vars_ = vars;
-                this->measures_ = measures;
+                this->measures_ = meas;
                 this->points_ = this->pointsPerState(this->vars_);
 
                 this->lambda_ = this->calculateLambda(ALPHA,KAPPA,this->vars_);
@@ -116,6 +117,18 @@ namespace ukf {
 
             int pointsPerState(int state) {
                 return 2*state+1;
+            }
+
+            void mean(state::StateVector<T>& state,mtx::Matrix<T>& data) {
+                this->compute_.mean(state,data);
+            }
+
+            void covariance(
+                mtx::Matrix<T>& cov,
+                mtx::Matrix<T>& data,
+                state::StateVector<T>& mean)
+            {
+                this->compute_.covariance(cov,data,mean);
             }
 
             void sigmaPoints(
@@ -243,6 +256,10 @@ namespace ukf {
             {
 
 
+
+
+
+
                 //std::cout << "\n1\n" << std::endl;
                 //state.precisionPrint();
                 //covariance.precisionPrint();
@@ -266,6 +283,7 @@ namespace ukf {
                 //std::cout << this->gamma_ << std::endl;
 
 
+
                 this->gFunction(
                     this->sigma_predict_,
                     this->sigma_belief_,
@@ -278,6 +296,8 @@ namespace ukf {
                 //control.precisionPrint();
 
 
+
+
                 this->sumWeightedMean(
                     this->state_belief_,
                     this->sigma_predict_,
@@ -288,6 +308,8 @@ namespace ukf {
                 //this->state_belief_.precisionPrint();
                 //this->sigma_predict_.precisionPrint();
                 //this->mean_weight_.precisionPrint();
+
+
 
 
                 this->sumWeightedCovariance(
@@ -306,6 +328,9 @@ namespace ukf {
                 //this->noise_r_.precisionPrint();
 
 
+
+
+
                 this->sigmaPoints(
                     this->sigma_belief_,
                     this->state_belief_,
@@ -321,6 +346,10 @@ namespace ukf {
                 //std::cout << this->gamma_ << std::endl;
 
 
+
+
+
+
                 this->hFunction(
                     this->sigma_predict_,
                     this->sigma_belief_);
@@ -331,9 +360,11 @@ namespace ukf {
                 //this->sigma_belief_.precisionPrint();
 
 
+
+
                 this->sumWeightedMean(
                     this->state_obser_,
-                    this->sigma_predict_,
+                    this->sigma_obser_,
                     this->mean_weight_);
 
 
@@ -343,9 +374,12 @@ namespace ukf {
                 //this->mean_weight_.precisionPrint();
 
 
+
+
+
                 this->sumWeightedCovariance(
                     this->covar_obser_,
-                    this->sigma_predict_,
+                    this->sigma_obser_,
                     this->state_belief_,
                     this->covar_weight_,
                     this->noise_q_);
@@ -359,13 +393,17 @@ namespace ukf {
                 //this->noise_q_.precisionPrint();
 
 
+
+
                 this->sumWeightedCovariance(
                     this->covar_cross_,
                     this->sigma_belief_,
                     this->state_belief_,
-                    this->sigma_predict_,
+                    this->sigma_obser_,
                     this->state_obser_,
                     this->covar_weight_);
+
+
 
 
                 //std::cout << "\n10\n" << std::endl;
@@ -377,11 +415,15 @@ namespace ukf {
                 //this->covar_weight_.precisionPrint();
 
 
+
+
                 this->kalmanGain(
                     this->kalman_gain_,
                     this->covar_cross_,
                     this->covar_obser_,
                     this->covar_obser_inv_);
+
+
 
 
                 //std::cout << "\n11\n" << std::endl;
@@ -421,6 +463,9 @@ namespace ukf {
                 //this->covar_obser_.precisionPrint();
 
 
+
+
+
             }
 
 
@@ -442,6 +487,7 @@ namespace ukf {
 
             sigma::SigmaPoints<T> sigma_belief_;
             sigma::SigmaPoints<T> sigma_predict_;
+            sigma::SigmaPoints<T> sigma_obser_;
 
             state::WeightVector<T> mean_weight_;
             state::WeightVector<T> covar_weight_;

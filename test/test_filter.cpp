@@ -18,37 +18,38 @@ void testUnscentedKalmanFilter() {
 
     int vars = 5;
     int samples = 9;
+    int meas = 2;
 
-    ukf::UnscentedKalmanFilter<double> ukf(vars);
+    ukf::UnscentedKalmanFilter<double> ukf(vars,meas);
     model::MotionModel<double>* motion = new model::SimpleMotionModel<double>();
     sensor::SensorModel<double>* sensor = new sensor::SimpleSensorModel<double>();
     ukf.setMotionModel(motion);
     ukf.setSensorModel(sensor);
 
     mtx::Matrix<double> data = fillDataMatrix("../test/data/filter.txt");
-    calc::Calculator<double> calc(vars);
 
     state::StateVector<double> mean(vars);
     mtx::Matrix<double> cov(vars,vars);
     state::StateVector<double> ctrl(vars);
-    state::StateVector<double> msr(vars);
+    state::StateVector<double> msr(meas);
 
-    calc.mean(mean,data);
-    msr = mean;
-    calc.covariance(cov,data,mean);
+    ukf.mean(mean,data);
+    ukf.covariance(cov,data,mean);
 
+    msr[0] = mean[0];
+    msr[1] = mean[1];
 
     mean.precisionPrint();
     cov.precisionPrint();
 
 
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 10; ++i) {
 
-        calc.covariance(cov,data,mean);
+        ukf.covariance(cov,data,mean);
         ukf.update(mean,cov,ctrl,msr);
         std::cout << "iteration " << i << std::endl;
         mean.precisionPrint();
-        //cov.precisionPrint();
+        cov.precisionPrint();
 
     }
 

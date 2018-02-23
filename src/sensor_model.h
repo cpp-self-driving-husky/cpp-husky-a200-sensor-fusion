@@ -42,8 +42,10 @@ namespace sensor {
                 sigma::SigmaPoints<T>& prediction)
             {
                 int points = prediction.getNumPoints();
-                for (int i = 0; i < points; ++i)
-                    observation[i] = prediction[i];
+                for (int i = 0; i < points; ++i) {
+                    observation[i][0] = prediction[i][0];
+                    observation[i][1] = prediction[i][1];
+                }
 
                 //int points = prediction.getNumPoints(),
                 //    vars = prediction.getStateSize();

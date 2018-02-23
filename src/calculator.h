@@ -105,15 +105,6 @@ namespace calc {
                 }
             }
 
-            void transpose(mtx::Matrix<T>& trans, mtx::Matrix<T>& matrix) {
-                int rows = trans.getRows(),
-                    cols = trans.getCols();
-                for (int i = 0; i < rows; ++i)
-                    for (int j = 0; j < cols; ++j)
-                        trans[j*rows+i] = matrix[i*cols+j];
-                trans.swapDimensions();
-            }
-
             void subtract(mtx::Matrix<T>& P, mtx::Matrix<T>& A, mtx::Matrix<T>& B) {
                 int len = P.getSize();
                 for (int i = 0; i < len; ++i)
@@ -195,8 +186,8 @@ namespace calc {
             }
 
             bool LUPinverse(mtx::Matrix<T>& LU) {
-                this->zero(this->state_x_,this->vars_);
-                this->zero(this->state_y_,this->vars_);
+                this->zero(this->state_x_,this->meas_);
+                this->zero(this->state_y_,this->meas_);
                 int len = LU.getRows();
                 for (int i = 0; i < len; ++i) {
                     for (int j = 0; j < len; ++j)
