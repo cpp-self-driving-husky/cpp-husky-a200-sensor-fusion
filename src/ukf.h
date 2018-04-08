@@ -92,7 +92,7 @@ namespace ukf {
                 this->motion_model_ = model;
             }
 
-            void setSensorModel(sensor::SensorModel<T>* sensor) {
+            void setSensorModel(model::SensorModel<T>* sensor) {
                 this->deallocateModel(this->sensor_model_);
                 this->sensor_model_ = sensor;
             }
@@ -473,7 +473,7 @@ namespace ukf {
             calc::Calculator<T> compute_;
 
             model::MotionModel<T>* motion_model_;
-            sensor::SensorModel<T>* sensor_model_;
+            model::SensorModel<T>* sensor_model_;
 
             state::StateVector<T> state_belief_;
             state::StateVector<T> state_obser_;

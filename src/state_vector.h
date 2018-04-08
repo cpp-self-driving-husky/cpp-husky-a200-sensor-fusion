@@ -24,11 +24,20 @@ namespace state {
                 this->init(vars);
             }
 
+            StateVector(const StateVector<T>& vec) :
+                vec_(nullptr), vars_(0)
+            {
+                this->init(vec.getVars());
+                for (int i = 0; i < this->vars_; ++i)
+                    this->vec_[i] = vec.vec_[i];
+            }
+
+
             ~StateVector() {
                 this->destroy();
             }
 
-            void init(int vars) {
+            void init(const int vars) {
                 this->destroy();
                 this->vars_ = vars;
                 this->vec_ = new T[this->vars_];
@@ -59,7 +68,7 @@ namespace state {
                 return this->vec_[i];
             }
 
-            int getVars() {
+            const int getVars() const {
                 return this->vars_;
             }
 

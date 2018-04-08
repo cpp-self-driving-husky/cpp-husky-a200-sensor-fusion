@@ -220,10 +220,67 @@ namespace model {
 
     };
 
+
+    // assumes global position is same as control
+    template<class T>
+    class SimpleVelocityModel : public MotionModel<T> {
+
+        public:
+            SimpleVelocityModel() :
+                MotionModel<T>()
+            {}
+
+            ~SimpleVelocityModel() {
+
+            }
+
+
+            //  state vector assumed
+            //      x1 == x
+            //      x2 == y
+            //      x3 == vx
+            //      x4 == xy
+
+            //  control vector assumed
+            //      u1 == delta x
+            //      u2 == delta y
+            //      u3 == delta t
+            virtual double calculate(
+                state::StateVector<T>& x_tf,
+                state::StateVector<T>& x_ti,
+                state::ControlVector<T>& u_tf,
+                state::ControlVector<T>& u_ti)
+            {
+                //T delta_x = u_tf[0] - u_ti[0];
+                //T delta_y = u_tf[1] - u_ti[1];
+                //T delta_t = u_tf[2] - u_ti[2];
+
+                T delta_x = u_tf[0];
+                T delta_y = u_tf[1];
+                T delta_t = u_tf[2];
+
+                T vx = delta_x / delta_t;
+                T vy = delta_y / delta_t;
+
+                x_tf[0] = x_ti[0] + delta_x;
+                x_tf[1] = x_ti[1] + delta_y;
+                x_tf[2] = vx;
+                x_tf[3] = vy;
+
+                return 1.0;
+            }
+
+            virtual double probability(T a, T b) {
+                return 1.0;
+            }
+
+
+        private:
+
+    };
+
 }
 
 
 #endif // MOTION_MODEL_H_
-
-
 

@@ -1,7 +1,9 @@
+#ifndef SENSOR_MODEL_H_
+#define SENSOR_MODEL_H_
 #include "sigma_points.h"
 
 
-namespace sensor {
+namespace model {
 
     template<class T>
     class SensorModel {
@@ -29,9 +31,9 @@ namespace sensor {
     class SimpleSensorModel : public SensorModel<T> {
 
         public:
-            SimpleSensorModel() {
-
-            }
+            SimpleSensorModel() :
+                SensorModel<T>()
+            {}
 
             virtual ~SimpleSensorModel() {
 
@@ -59,5 +61,37 @@ namespace sensor {
 
     };
 
+
+    template<class T>
+    class SimpleSensorVelocityModel : public SensorModel<T> {
+
+        public:
+            SimpleSensorVelocityModel() :
+                SensorModel<T>()
+            {}
+
+            ~SimpleSensorVelocityModel() {
+
+            }
+
+            virtual void calculate(
+                sigma::SigmaPoints<T>& observation,
+                sigma::SigmaPoints<T>& prediction)
+            {
+                int points = prediction.getNumPoints();
+                for (int i = 0; i < points; ++i) {
+                    observation[i][0] = prediction[i][0];
+                    observation[i][0] = prediction[i][0];
+                }
+            }
+
+        private:
+
+    };
+
+
 };
+
+
+#endif
 
