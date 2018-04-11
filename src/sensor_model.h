@@ -74,6 +74,23 @@ namespace model {
 
             }
 
+            /*
+
+            virtual void calculate(
+                sigma::SigmaPoints<T>& observation,
+                sigma::SigmaPoints<T>& prediction)
+            {
+                int points = prediction.getNumPoints();
+                for (int i = 0; i < points; ++i) {
+                    observation[i][0] = prediction[i][0]+1;
+                    observation[i][0] = prediction[i][0]+1;
+                }
+            }
+
+            */
+
+
+
             virtual void calculate(
                 sigma::SigmaPoints<T>& observation,
                 sigma::SigmaPoints<T>& prediction)
@@ -81,9 +98,10 @@ namespace model {
                 int points = prediction.getNumPoints();
                 for (int i = 0; i < points; ++i) {
                     observation[i][0] = prediction[i][0];
-                    observation[i][0] = prediction[i][0];
+                    observation[i][1] = prediction[i][1];
                 }
             }
+
 
         private:
 

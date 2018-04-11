@@ -264,11 +264,27 @@ namespace model {
 
                 x_tf[0] = x_ti[0] + delta_x;
                 x_tf[1] = x_ti[1] + delta_y;
-                x_tf[2] = vx;
-                x_tf[3] = vy;
+                x_tf[2] = x_ti[2];
+                x_tf[3] = x_ti[3];
 
                 return 1.0;
             }
+
+
+
+            /*
+
+            virtual double calculate(
+                state::StateVector<T>& x_tf,
+                state::StateVector<T>& x_ti,
+                state::ControlVector<T>& u_tf,
+                state::ControlVector<T>& u_ti)
+            {
+                x_tf = x_ti;
+                return 0.0;
+            }
+
+            */
 
             virtual double probability(T a, T b) {
                 return 1.0;
