@@ -178,6 +178,14 @@ namespace state {
                     "points: " << this->points_ << "\n" << std::endl;
             }
 
+            void precisionPrint() {
+                int def_prec = 6,
+                    prec = 17;
+                std::cout << std::setprecision(prec);
+                this->print();
+                std::cout << std::setprecision(def_prec);
+            }
+
         private:
             int points_;
 

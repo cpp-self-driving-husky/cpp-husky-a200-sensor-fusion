@@ -13,9 +13,9 @@
 namespace ukf {
 
     namespace {
-        const double ALPHA = 0.5;
-        const double BETA = 2.0;
-        const double KAPPA = 2.0;
+        const double ALPHA_DEF = 0.5;
+        const double BETA_DEF = 2.0;
+        const double KAPPA_DEF = 3.0;
     }
 
 
@@ -51,6 +51,10 @@ namespace ukf {
                 noise_q_(mtx::Matrix<T>(meas,meas)),
                 kalman_gain_(mtx::Matrix<T>(vars,meas)),
 
+                alpha_(ALPHA_DEF),
+                beta_(BETA_DEF),
+                kappa_(KAPPA_DEF-vars),
+
                 // TODO remove this, will be unnecessary
                 //      or replace with a motion vector
                 place_holder_(state::StateVector<T>(vars))
@@ -67,11 +71,14 @@ namespace ukf {
                 this->measures_ = meas;
                 this->points_ = this->pointsPerState(this->vars_);
 
-                this->lambda_ = this->calculateLambda(ALPHA,KAPPA,this->vars_);
-                this->gamma_ = this->calculateGamma(this->lambda_,this->vars_);
+                this->lambda_ = this->calculateLambda(
+                    this->alpha_,this->kappa_,this->vars_);
+                this->gamma_ = this->calculateGamma(
+                    this->lambda_,this->vars_);
 
                 this->mean_weight_.populateMean(this->lambda_);
-                this->covar_weight_.populateCovariance(this->lambda_,ALPHA,BETA);
+                this->covar_weight_.populateCovariance(
+                    this->lambda_,this->alpha_,this->beta_);
             }
 
             void destroy() {
@@ -229,13 +236,14 @@ namespace ukf {
                 state::StateVector<T>& obser,
                 mtx::Matrix<T>& gain)
             {
-                state.zero();
                 int row = gain.getRows(),
                     col = gain.getCols();
                 for (int i = 0; i < row; ++i) {
-                    for (int j = 0; j < col; ++j)
-                        state[i] += gain[i*col+j] * (meas[i]-obser[i]);
-                    state[i] += prev[i];
+                    T elem = 0.0;
+                    for (int j = 0; j < col; ++j) {
+                        elem += gain[i*col+j] * (meas[j]-obser[j]);
+                    }
+                    state[i] = prev[i] + elem;
                 }
             }
 
@@ -495,6 +503,10 @@ namespace ukf {
 
             T lambda_;
             T gamma_;
+
+            T alpha_;
+            T beta_;
+            T kappa_;
 
             int vars_;
             int measures_;
