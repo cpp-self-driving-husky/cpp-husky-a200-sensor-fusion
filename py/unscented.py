@@ -19,6 +19,7 @@ def h_cv(x):
 def run():
 
 	N = 4
+	M = 2
 	dt = 1.0
 	xi,yi = 78.6,191.2
 	xd,yd = 0.7,0.5
@@ -32,23 +33,18 @@ def run():
 					  [0.2, 1.0, 0.2, 0.2],
 					  [0.2, 0.2, 1.0, 0.2],
 					  [0.2, 0.2, 0.2, 1.0]])
-	
+					  
 	ctrl = np.array([xd,yd])
-	zs = [np.array([xi+i*xd,yi+i*yd]) for i in range(1,11)]
+	zs = [np.array([xi+i*xd+xd,yi+i*yd+yd]) for i in range(1,11)]
 	
-	#print(ukf.x)
-	#print(ukf.P)
-	
-	uxs = []
-	for z in zs:
+	for z in zs[:1]:
 		ukf.predict(fx_args=(ctrl))
-		
-		print(ukf.sigmas_f)
-		return
-		
 		ukf.update(z)
+		
+		print(ukf.x)
+		print(ukf.P)
 
-
+		
 	
 if __name__ == '__main__':
 	run()

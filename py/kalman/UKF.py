@@ -13,7 +13,7 @@ from kalman.stats import logpdf
 
 def unscented_transform(sigmas, Wm, Wc, noise_cov=None,
                         mean_fn=None, residual_fn=None):
-
+							
     kmax, n = sigmas.shape
     if mean_fn is None:
         x = np.dot(Wm, sigmas)
@@ -77,6 +77,7 @@ class UnscentedKalmanFilter:
 
 
     def predict(self, dt=None,  UT=None, fx_args=()):
+
         if dt is None:
             dt = self._dt
 
@@ -87,6 +88,7 @@ class UnscentedKalmanFilter:
             UT = unscented_transform
 
         self.compute_process_sigmas(dt, *fx_args)
+
         self.x, self.P = UT(self.sigmas_f, self.Wm, self.Wc, self.Q,
                             self.x_mean, self.residual_x)
 
@@ -130,17 +132,25 @@ class UnscentedKalmanFilter:
             R = self.R
         elif isscalar(R):
             R = eye(self._dim_z) * R
+            
+            
+            
+        # below for testing
+        sigmas_t = self.points_fn.sigma_points(self.x,self.P)
+        self.sigmas_f = sigmas_t
+        # above for testing
+
+
 
         for i, s in enumerate(self.sigmas_f):
             self.sigmas_h[i] = self.hx(s, *hx_args)
-
+        
         # mean and covariance of prediction passed through unscented transform
         zp, Pz = UT(self.sigmas_h, self.Wm, self.Wc, R, self.z_mean, self.residual_z)
 
         # compute cross variance of the state and the measurements
         Pxz = self.cross_variance(self.x, zp, self.sigmas_f, self.sigmas_h)
-
-
+        
         self.K = dot(Pxz, inv(Pz))        # Kalman gain
         self.y = self.residual_z(z, zp)   # residual
 
