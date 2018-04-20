@@ -53,7 +53,7 @@ namespace ukf {
 
                 alpha_(ALPHA_DEF),
                 beta_(BETA_DEF),
-                kappa_(KAPPA_DEF-vars),
+                kappa_(vars-KAPPA_DEF),
 
                 // TODO remove this, will be unnecessary
                 //      or replace with a motion vector
@@ -105,7 +105,7 @@ namespace ukf {
             }
 
             void setNoiseR(mtx::Matrix<T>& noise) {
-                this.noise_r_.init(noise.getRows(),noise.getCols());
+                this->noise_r_.init(noise.getRows(),noise.getCols());
                 this->noise_r_ = noise;
             }
 
@@ -198,6 +198,7 @@ namespace ukf {
                 covariance += noise;
             }
 
+
             void sumWeightedCovariance(
                 mtx::Matrix<T>& covariance,
                 sigma::SigmaPoints<T>& sigma_x,
@@ -245,6 +246,12 @@ namespace ukf {
                     }
                     state[i] = prev[i] + elem;
                 }
+
+                //std::cout << "\nin update state\n" << std::endl;
+                //gain.precisionPrint();
+                //meas.precisionPrint();
+                //obser.precisionPrint();
+
             }
 
             void updateCovariance(
@@ -386,7 +393,7 @@ namespace ukf {
                 this->sumWeightedCovariance(
                     this->covar_obser_,
                     this->sigma_obser_,
-                    this->state_belief_,
+                    this->state_obser_,
                     this->covar_weight_,
                     this->noise_q_);
 
@@ -394,8 +401,8 @@ namespace ukf {
 
                 //std::cout << "\n9\n" << std::endl;
                 //this->covar_obser_.precisionPrint();
-                //this->sigma_predict_.precisionPrint();
-                //this->state_belief_.precisionPrint();
+                //this->sigma_obser_.precisionPrint();
+                //this->state_obser_.precisionPrint();
                 //this->covar_weight_.precisionPrint();
                 //this->noise_q_.precisionPrint();
 
@@ -415,7 +422,7 @@ namespace ukf {
                 //this->covar_cross_.precisionPrint();
                 //this->sigma_belief_.precisionPrint();
                 //this->state_belief_.precisionPrint();
-                //this->sigma_predict_.precisionPrint();
+                //this->sigma_obser_.precisionPrint();
                 //this->state_obser_.precisionPrint();
                 //this->covar_weight_.precisionPrint();
 
@@ -429,8 +436,8 @@ namespace ukf {
 
 
 
-                //std::cout << "\n11\n" << std::endl;
-                //this->kalman_gain_.precisionPrint();
+                std::cout << "\n11\n" << std::endl;
+                this->kalman_gain_.precisionPrint();
                 //this->covar_cross_.precisionPrint();
                 //this->covar_obser_.precisionPrint();
                 //this->covar_obser_inv_.precisionPrint();
@@ -446,8 +453,8 @@ namespace ukf {
 
 
 
-                //std::cout << "\n12\n" << std::endl;
-                //state.precisionPrint();
+                std::cout << "\n12\n" << std::endl;
+                state.precisionPrint();
                 //this->state_belief_.precisionPrint();
                 //measurement.precisionPrint();
                 //this->state_obser_.precisionPrint();
@@ -463,8 +470,8 @@ namespace ukf {
 
 
 
-                //std::cout << "\n13\n" << std::endl;
-                //covariance.precisionPrint();
+                std::cout << "\n13\n" << std::endl;
+                covariance.precisionPrint();
                 //this->covar_belief_.precisionPrint();
                 //this->kalman_gain_.precisionPrint();
                 //this->covar_obser_.precisionPrint();
@@ -510,7 +517,6 @@ namespace ukf {
 
             int vars_;
             int measures_;
-
             int points_;
 
 
