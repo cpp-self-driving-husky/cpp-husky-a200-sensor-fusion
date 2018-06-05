@@ -1,31 +1,9 @@
 #ifndef SENSOR_MODEL_H_
 #define SENSOR_MODEL_H_
-#include "sigma_points.h"
+#include "models.h"
 
 
 namespace model {
-
-    template<class T>
-    class SensorModel {
-
-        public:
-            SensorModel() {
-
-            }
-
-            virtual ~SensorModel() {
-
-            }
-
-            virtual void calculate(
-                sigma::SigmaPoints<T>& observation,
-                sigma::SigmaPoints<T>& prediction) = 0;
-
-
-        private:
-
-    };
-
 
     template<class T>
     class SimpleSensorModel : public SensorModel<T> {

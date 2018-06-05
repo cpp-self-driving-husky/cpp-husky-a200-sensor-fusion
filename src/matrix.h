@@ -1,7 +1,7 @@
 #ifndef MATRIX_H_
 #define MATRIX_H_
 #include <cmath>
-#include "state_vector.h"
+#include "state.h"
 
 
 // TODO remove inclusion
@@ -48,16 +48,16 @@ namespace mtx {
                     this->matrix_[i] = matrix[i];
             }
 
-            //void replicate(Matrix<T>& matrix) {
-            //    int elems = this->rows_*this->cols_;
-            //    for (int i = 0; i < elems; ++i)
-            //        matrix[i] = this->matrix_[i];
-            //}
-
             void zero() {
                 int elems = this->rows_*this->cols_;
                 for (int i = 0; i < elems; ++i)
                     this->matrix_[i] = 0.0;
+            }
+
+            void identity() {
+                this->zero();
+                for (int i = 0; i < this->rows_; ++i)
+                    this->matrix_[i*this->rows_+i] = 1.0;
             }
 
             void destroy() {

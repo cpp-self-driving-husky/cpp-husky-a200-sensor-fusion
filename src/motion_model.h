@@ -1,7 +1,7 @@
 #ifndef MOTION_MODEL_H_
 #define MOTION_MODEL_H_
 #include <cmath>
-#include "state_vector.h"
+#include "models.h"
 
 
 namespace {
@@ -19,66 +19,13 @@ namespace {
 
 namespace model {
 
-    template<class T>
-    class MotionModel {
-
-        public:
-            MotionModel() {
-
-            }
-
-            virtual ~MotionModel() {
-
-            }
-
-            virtual double calculate(
-                state::StateVector<T>& x_tf,
-                state::StateVector<T>& x_ti,
-                state::ControlVector<T>& u_tf,
-                state::ControlVector<T>& u_ti) = 0;
-
-            virtual double probability(
-                T a, T b) = 0;
-
-        protected:
-            double distance(
-                T x_f, T x_i,
-                T y_f, T y_i)
-            {
-                return std::sqrt(std::pow(x_f-x_i,2)+std::pow(y_f-y_i,2));
-            }
-
-            double variance(
-                T a1, T d1,
-                T a2, T d2)
-            {
-                return
-                    a1*std::pow(d1,2)+
-                    a2*std::pow(d2,2);
-            }
-
-            double variance(
-                T a1, T d1,
-                T a2, T d2,
-                T d3)
-            {
-                return
-                    a1*std::pow(d1,2)+
-                    a2*std::pow(d2,2)+
-                    a2*std::pow(d3,2);
-            }
-
-        private:
-
-    };
-
 
     template<class T>
-    class OdometryMotionModel : public MotionModel<T> {
+    class OdometryMotionModel : public ProcessModel<T> {
 
         public:
             OdometryMotionModel() :
-                MotionModel<T>(),
+                ProcessModel<T>(),
                 delta_i_(state::ParameterVector<T>(this->params_)),
                 delta_f_(state::ParameterVector<T>(this->params_))
             {}
@@ -184,11 +131,11 @@ namespace model {
     // a linear motion model created just for testing purposes
     // not to be used in actual implementation
     template<class T>
-    class SimpleMotionModel : public MotionModel<T> {
+    class SimpleMotionModel : public ProcessModel<T> {
 
         public:
             SimpleMotionModel() :
-                MotionModel<T>()
+                ProcessModel<T>()
             {}
 
             ~SimpleMotionModel() {
@@ -223,11 +170,11 @@ namespace model {
 
     // assumes global position is same as control
     template<class T>
-    class SimpleVelocityModel : public MotionModel<T> {
+    class SimpleVelocityModel : public ProcessModel<T> {
 
         public:
             SimpleVelocityModel() :
-                MotionModel<T>()
+                ProcessModel<T>()
             {}
 
             ~SimpleVelocityModel() {

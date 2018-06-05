@@ -1,12 +1,12 @@
 #ifndef UKF_H_
 #define UKF_H_
 #include "calculator.h"
-#include "sigma_points.h"
+// #include "sigma.h"
 #include "motion_model.h"
 #include "sensor_model.h"
 
 
-// TODO remove!!!!
+// TODO remove
 #include "../test/utilitest.h"
 
 
@@ -28,7 +28,7 @@ namespace ukf {
                 lambda_(0.0),gamma_(0.0),
 
                 compute_(calc::Calculator<T>(vars,meas)),
-                motion_model_(nullptr),sensor_model_(nullptr),
+                process_model_(nullptr),sensor_model_(nullptr),
 
                 state_belief_(state::StateVector<T>(vars)),
                 state_obser_(state::StateVector<T>(meas)),
@@ -79,10 +79,14 @@ namespace ukf {
                 this->mean_weight_.populateMean(this->lambda_);
                 this->covar_weight_.populateCovariance(
                     this->lambda_,this->alpha_,this->beta_);
+
+                this->noise_r_.identity();
+                this->noise_q_.identity();
+
             }
 
             void destroy() {
-                this->deallocateModel(this->motion_model_);
+                this->deallocateModel(this->process_model_);
                 this->deallocateModel(this->sensor_model_);
             }
 
@@ -94,9 +98,9 @@ namespace ukf {
                 }
             }
 
-            void setMotionModel(model::MotionModel<T>* model) {
-                this->deallocateModel(this->motion_model_);
-                this->motion_model_ = model;
+            void setProcessModel(model::ProcessModel<T>* model) {
+                this->deallocateModel(this->process_model_);
+                this->process_model_ = model;
             }
 
             void setSensorModel(model::SensorModel<T>* sensor) {
@@ -156,11 +160,9 @@ namespace ukf {
             {
                 int points = predict.getNumPoints();
                 for (int i = 0; i < points; ++i)
-                    this->motion_model_->calculate(
+                    this->process_model_->calculate(
                         predict[i],belief[i],
                         control,this->place_holder_);
-
-                //control.print();
             }
 
             void hFunction(
@@ -241,17 +243,10 @@ namespace ukf {
                     col = gain.getCols();
                 for (int i = 0; i < row; ++i) {
                     T elem = 0.0;
-                    for (int j = 0; j < col; ++j) {
+                    for (int j = 0; j < col; ++j)
                         elem += gain[i*col+j] * (meas[j]-obser[j]);
-                    }
                     state[i] = prev[i] + elem;
                 }
-
-                //std::cout << "\nin update state\n" << std::endl;
-                //gain.precisionPrint();
-                //meas.precisionPrint();
-                //obser.precisionPrint();
-
             }
 
             void updateCovariance(
@@ -436,8 +431,8 @@ namespace ukf {
 
 
 
-                std::cout << "\n11\n" << std::endl;
-                this->kalman_gain_.precisionPrint();
+                //std::cout << "\n11\n" << std::endl;
+                //this->kalman_gain_.precisionPrint();
                 //this->covar_cross_.precisionPrint();
                 //this->covar_obser_.precisionPrint();
                 //this->covar_obser_inv_.precisionPrint();
@@ -453,8 +448,8 @@ namespace ukf {
 
 
 
-                std::cout << "\n12\n" << std::endl;
-                state.precisionPrint();
+                //std::cout << "\n12\n" << std::endl;
+                //state.precisionPrint();
                 //this->state_belief_.precisionPrint();
                 //measurement.precisionPrint();
                 //this->state_obser_.precisionPrint();
@@ -470,8 +465,8 @@ namespace ukf {
 
 
 
-                std::cout << "\n13\n" << std::endl;
-                covariance.precisionPrint();
+                //std::cout << "\n13\n" << std::endl;
+                //covariance.precisionPrint();
                 //this->covar_belief_.precisionPrint();
                 //this->kalman_gain_.precisionPrint();
                 //this->covar_obser_.precisionPrint();
@@ -484,7 +479,7 @@ namespace ukf {
         private:
             calc::Calculator<T> compute_;
 
-            model::MotionModel<T>* motion_model_;
+            model::ProcessModel<T>* process_model_;
             model::SensorModel<T>* sensor_model_;
 
             state::StateVector<T> state_belief_;
@@ -518,7 +513,6 @@ namespace ukf {
             int vars_;
             int measures_;
             int points_;
-
 
             state::StateVector<T> place_holder_;
 
