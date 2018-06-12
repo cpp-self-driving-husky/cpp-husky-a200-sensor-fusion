@@ -38,9 +38,9 @@ namespace ukf {
                 covar_obser_inv_(mtx::Matrix<T>(meas,meas)),
                 covar_cholesky_(mtx::Matrix<T>(vars,vars)),
 
-                sigma_belief_(this->pointsPerState(vars),vars),
-                sigma_predict_(this->pointsPerState(vars),vars),
-                sigma_obser_(this->pointsPerState(vars),meas),
+                sigma_belief_(sigma::SigmaPoints<T>(this->pointsPerState(vars),vars)),
+                sigma_predict_(sigma::SigmaPoints<T>(this->pointsPerState(vars),vars)),
+                sigma_obser_(sigma::SigmaPoints<T>(this->pointsPerState(vars),meas)),
 
                 mean_weight_(vct::Weights<T>(this->pointsPerState(vars))),
                 covar_weight_(vct::Weights<T>(this->pointsPerState(vars))),
@@ -74,7 +74,7 @@ namespace ukf {
                 this->gamma_ = this->calculateGamma(
                     this->lambda_,this->vars_);
 
-                this->populateMean(this->mean_weight_, this->lambda_);
+                this->populateMean(this->mean_weight_,this->lambda_);
                 this->populateCovariance(this->covar_weight_,
                     this->lambda_,this->alpha_,this->beta_);
 
@@ -164,7 +164,13 @@ namespace ukf {
                 T gamma)
             {
                 cholesky = covariance.llt().matrixL();
-                sigma.generatePoints(state, cholesky, gamma);
+                cholesky *= gamma;
+                sigma.row(0) = state;
+                int vars = sigma.cols();
+                for (int i = 0; i < vars; ++i)
+                    sigma.row(i+1) = state+cholesky.col(i);
+                for (int i = 0; i < vars; ++i)
+                    sigma.row(i+vars+1) = state-cholesky.col(i);
             }
 
             void gFunction(
@@ -172,11 +178,9 @@ namespace ukf {
                 sigma::SigmaPoints<T>& belief,
                 vct::State<T>& control)
             {
-                int points = predict.getNumPoints();
-                for (int i = 0; i < points; ++i)
-                    this->process_model_->calculate(
-                        predict[i],belief[i],
-                        control,this->place_holder_);
+                this->process_model_->calculate(
+                    predict, belief,
+                    control, this->place_holder_);
             }
 
             void hFunction(
@@ -192,11 +196,11 @@ namespace ukf {
                 vct::Weights<T>& weights)
             {
                 state.setZero();
-                int points = sigma.getNumPoints(),
-                    vars = sigma.getStateSize();
+                int points = sigma.rows(),
+                    vars = sigma.cols();
                 for (int i = 0; i < points; ++i)
                     for (int j = 0; j < vars; ++j)
-                        state(j) += sigma[i](j) * weights(i);
+                        state(j) += sigma(i,j) * weights(i);
             }
 
             void sumWeightedCovariance(
@@ -224,16 +228,16 @@ namespace ukf {
                 vct::Weights<T>& weight)
             {
                 covariance.setZero();
-                int rows = sigma_x.getStateSize(),
-                    inner = sigma_x.getNumPoints(),
-                    cols = sigma_z.getStateSize();
+                int rows = sigma_x.cols(),
+                    inner = sigma_x.rows(),
+                    cols = sigma_z.cols();
                 for (int i = 0; i < rows; ++i)
                     for (int j = 0; j < cols; ++j)
                         for (int k = 0; k < inner; ++k)
                             covariance(i,j) +=
                                 weight(k) *
-                                (sigma_x[k](i)-state_a(i)) *
-                                (sigma_z[k](j)-state_b(j));
+                                (sigma_x(k,i)-state_a(i)) *
+                                (sigma_z(k,j)-state_b(j));
             }
 
             void kalmanGain(

@@ -31,5 +31,13 @@ namespace mtx {
 }
 
 
+namespace sigma {
+
+    template<typename T>
+    using SigmaPoints = mtx::Matrix<T>;
+
+}
+
+
 #endif
 

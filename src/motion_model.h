@@ -148,8 +148,8 @@ namespace model {
             }
 
             virtual double calculate(
-                vct::State<T>& x_tf,
-                vct::State<T>& x_ti,
+                sigma::SigmaPoints<T>& x_tf,
+                sigma::SigmaPoints<T>& x_ti,
                 vct::State<T>& u_tf,
                 vct::State<T>& u_ti)
             {
@@ -198,8 +198,8 @@ namespace model {
             //      u2 == delta y
             //      u3 == delta t
             virtual double calculate(
-                vct::State<T>& x_tf,
-                vct::State<T>& x_ti,
+                sigma::SigmaPoints<T>& x_tf,
+                sigma::SigmaPoints<T>& x_ti,
                 vct::State<T>& u_tf,
                 vct::State<T>& u_ti)
             {
@@ -207,17 +207,21 @@ namespace model {
                 //T delta_y = u_tf[1] - u_ti[1];
                 //T delta_t = u_tf[2] - u_ti[2];
 
-                T delta_x = u_tf(0);
-                T delta_y = u_tf(1);
-                T delta_t = u_tf(2);
+                for (int i = 0; i < x_tf.rows(); ++i) {
 
-                T vx = delta_x / delta_t;
-                T vy = delta_y / delta_t;
+                    T delta_x = u_tf(0);
+                    T delta_y = u_tf(1);
+                    T delta_t = u_tf(2);
 
-                x_tf(0) = x_ti(0) + delta_x;
-                x_tf(1) = x_ti(1) + delta_y;
-                x_tf(2) = x_ti(2);
-                x_tf(3) = x_ti(3);
+                    T vx = delta_x / delta_t;
+                    T vy = delta_y / delta_t;
+
+                    x_tf(i,0) = x_ti(i,0) + delta_x;
+                    x_tf(i,1) = x_ti(i,1) + delta_y;
+                    x_tf(i,2) = x_ti(i,2);
+                    x_tf(i,3) = x_ti(i,3);
+
+                }
 
                 return 1.0;
             }

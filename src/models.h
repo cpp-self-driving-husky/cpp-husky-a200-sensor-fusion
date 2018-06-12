@@ -1,6 +1,6 @@
 #ifndef MODELS_H_
 #define MODELS_H_
-#include "sigma.h"
+// #include "sigma.h"
 #include "utilities.h"
 
 
@@ -21,8 +21,8 @@ namespace model {
             }
 
             virtual double calculate(
-                vct::State<T>& x_tf,
-                vct::State<T>& x_ti,
+                sigma::SigmaPoints<T>& x_tf,
+                sigma::SigmaPoints<T>& x_ti,
                 vct::State<T>& u_tf,
                 vct::State<T>& u_ti) = 0;
 
