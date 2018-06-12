@@ -1,11 +1,12 @@
 #ifndef UKF_H_
 #define UKF_H_
-#include "calculator.h"
+#include "utilities.h"
 #include "models.h"
+#include <cmath>
 
 
 // TODO remove
-#include "../test/utilitest.h"
+// #include "../test-eigen/utilitest.h"
 
 
 namespace ukf {
@@ -25,11 +26,10 @@ namespace ukf {
                 vars_(0),measures_(0),points_(0),
                 lambda_(0.0),gamma_(0.0),
 
-                compute_(calc::Calculator<T>(vars,meas)),
                 process_model_(nullptr),sensor_model_(nullptr),
 
-                state_belief_(state::StateVector<T>(vars)),
-                state_obser_(state::StateVector<T>(meas)),
+                state_belief_(vct::State<T>(vars)),
+                state_obser_(vct::State<T>(meas)),
 
                 covar_belief_(mtx::Matrix<T>(vars,vars)),
                 covar_obser_(mtx::Matrix<T>(meas,meas)),
@@ -42,8 +42,8 @@ namespace ukf {
                 sigma_predict_(this->pointsPerState(vars),vars),
                 sigma_obser_(this->pointsPerState(vars),meas),
 
-                mean_weight_(state::WeightVector<T>(vars,this->pointsPerState(vars))),
-                covar_weight_(state::WeightVector<T>(vars,this->pointsPerState(vars))),
+                mean_weight_(vct::Weights<T>(this->pointsPerState(vars))),
+                covar_weight_(vct::Weights<T>(this->pointsPerState(vars))),
 
                 noise_r_(mtx::Matrix<T>(vars,vars)),
                 noise_q_(mtx::Matrix<T>(meas,meas)),
@@ -55,7 +55,7 @@ namespace ukf {
 
                 // TODO remove this, will be unnecessary
                 //      or replace with a motion vector
-                place_holder_(state::StateVector<T>(vars))
+                place_holder_(vct::State<T>(vars))
             {
                 this->init(vars,meas);
             }
@@ -74,12 +74,12 @@ namespace ukf {
                 this->gamma_ = this->calculateGamma(
                     this->lambda_,this->vars_);
 
-                this->mean_weight_.populateMean(this->lambda_);
-                this->covar_weight_.populateCovariance(
+                this->populateMean(this->mean_weight_, this->lambda_);
+                this->populateCovariance(this->covar_weight_,
                     this->lambda_,this->alpha_,this->beta_);
 
-                this->noise_r_.identity();
-                this->noise_q_.identity();
+                this->noise_r_.setIdentity();
+                this->noise_q_.setIdentity();
 
             }
 
@@ -96,6 +96,36 @@ namespace ukf {
                 }
             }
 
+            T zeroMean(T lambda) {
+                return lambda / (this->vars_+lambda);
+            }
+
+            T zeroCovariance(T lambda, T alpha, T beta) {
+                T mean = this->zeroMean(lambda);
+                return mean + (1 - std::pow(alpha,2) + beta);
+            }
+
+            T ithElement(T lambda) {
+                return 1.0 / (2.0 * (lambda + this->vars_));
+            }
+
+            void populateMean(vct::Weights<T>& weights, T lambda) {
+                weights(0) = this->zeroMean(lambda);
+                T ith_elem = this->ithElement(lambda);
+                for (int i = 1; i < this->points_; ++i)
+                    weights(i) = ith_elem;
+            }
+
+            void populateCovariance(
+                vct::Weights<T>& weights,
+                T lambda, T alpha, T beta)
+            {
+                weights(0) = this->zeroCovariance(lambda,alpha,beta);
+                T ith_elem = this->ithElement(lambda);
+                for (int i = 1; i < this->points_; ++i)
+                    weights(i) = ith_elem;
+            }
+
             void setProcessModel(model::ProcessModel<T>* model) {
                 this->deallocateModel(this->process_model_);
                 this->process_model_ = model;
@@ -107,12 +137,10 @@ namespace ukf {
             }
 
             void setNoiseR(mtx::Matrix<T>& noise) {
-                this->noise_r_.init(noise.getRows(),noise.getCols());
                 this->noise_r_ = noise;
             }
 
             void setNoiseQ(mtx::Matrix<T>& noise) {
-                this->noise_q_.init(noise.getRows(),noise.getCols());
                 this->noise_q_ = noise;
             }
 
@@ -128,33 +156,21 @@ namespace ukf {
                 return 2*state+1;
             }
 
-            void mean(state::StateVector<T>& state,mtx::Matrix<T>& data) {
-                this->compute_.mean(state,data);
-            }
-
-            void covariance(
-                mtx::Matrix<T>& cov,
-                mtx::Matrix<T>& data,
-                state::StateVector<T>& mean)
-            {
-                this->compute_.covariance(cov,data,mean);
-            }
-
             void sigmaPoints(
                 sigma::SigmaPoints<T>& sigma,
-                state::StateVector<T>& state,
+                vct::State<T>& state,
                 mtx::Matrix<T>& covariance,
                 mtx::Matrix<T>& cholesky,
                 T gamma)
             {
-                this->compute_.cholesky(cholesky,covariance);
-                sigma.generatePoints(state,cholesky,gamma);
+                cholesky = covariance.llt().matrixL();
+                sigma.generatePoints(state, cholesky, gamma);
             }
 
             void gFunction(
                 sigma::SigmaPoints<T>& predict,
                 sigma::SigmaPoints<T>& belief,
-                state::StateVector<T>& control)
+                vct::State<T>& control)
             {
                 int points = predict.getNumPoints();
                 for (int i = 0; i < points; ++i)
@@ -171,23 +187,23 @@ namespace ukf {
             }
 
             void sumWeightedMean(
-                state::StateVector<T>& state,
+                vct::State<T>& state,
                 sigma::SigmaPoints<T>& sigma,
-                state::WeightVector<T>& weights)
+                vct::Weights<T>& weights)
             {
-                state.zero();
+                state.setZero();
                 int points = sigma.getNumPoints(),
                     vars = sigma.getStateSize();
                 for (int i = 0; i < points; ++i)
                     for (int j = 0; j < vars; ++j)
-                        state[j] += sigma[i][j] * weights[i];
+                        state(j) += sigma[i](j) * weights(i);
             }
 
             void sumWeightedCovariance(
                 mtx::Matrix<T>& covariance,
                 sigma::SigmaPoints<T>& sigma,
-                state::StateVector<T>& belief,
-                state::WeightVector<T>& weight,
+                vct::State<T>& belief,
+                vct::Weights<T>& weight,
                 mtx::Matrix<T>& noise)
             {
                 this->sumWeightedCovariance(
@@ -202,22 +218,22 @@ namespace ukf {
             void sumWeightedCovariance(
                 mtx::Matrix<T>& covariance,
                 sigma::SigmaPoints<T>& sigma_x,
-                state::StateVector<T>& state_a,
+                vct::State<T>& state_a,
                 sigma::SigmaPoints<T>& sigma_z,
-                state::StateVector<T>& state_b,
-                state::WeightVector<T>& weight)
+                vct::State<T>& state_b,
+                vct::Weights<T>& weight)
             {
-                covariance.zero();
+                covariance.setZero();
                 int rows = sigma_x.getStateSize(),
                     inner = sigma_x.getNumPoints(),
                     cols = sigma_z.getStateSize();
                 for (int i = 0; i < rows; ++i)
                     for (int j = 0; j < cols; ++j)
                         for (int k = 0; k < inner; ++k)
-                            covariance[i*cols+j] +=
-                                weight[k] *
-                                (sigma_x[k][i]-state_a[i]) *
-                                (sigma_z[k][j]-state_b[j]);
+                            covariance(i,j) +=
+                                weight(k) *
+                                (sigma_x[k](i)-state_a(i)) *
+                                (sigma_z[k](j)-state_b(j));
             }
 
             void kalmanGain(
@@ -226,24 +242,24 @@ namespace ukf {
                 mtx::Matrix<T>& obser,
                 mtx::Matrix<T>& inv)
             {
-                this->compute_.inverse(inv,obser);
-                this->compute_.multiply(gain,covar,inv);
+                inv = obser.inverse();
+                gain = covar * inv;
             }
 
             void updateState(
-                state::StateVector<T>& state,
-                state::StateVector<T>& prev,
-                state::StateVector<T>& meas,
-                state::StateVector<T>& obser,
+                vct::State<T>& state,
+                vct::State<T>& prev,
+                vct::State<T>& meas,
+                vct::State<T>& obser,
                 mtx::Matrix<T>& gain)
             {
-                int row = gain.getRows(),
-                    col = gain.getCols();
+                int row = gain.rows(),
+                    col = gain.cols();
                 for (int i = 0; i < row; ++i) {
                     T elem = 0.0;
                     for (int j = 0; j < col; ++j)
-                        elem += gain[i*col+j] * (meas[j]-obser[j]);
-                    state[i] = prev[i] + elem;
+                        elem += gain(i,j) * (meas(j)-obser(j));
+                    state(i) = prev(i) + elem;
                 }
             }
 
@@ -253,18 +269,17 @@ namespace ukf {
                 mtx::Matrix<T>& gain,
                 mtx::Matrix<T>& obser)
             {
-                this->compute_.multiplyABAt(covar,gain,obser);
-                this->compute_.subtract(covar,belief,covar);
+                covar = gain * obser * gain.transpose();
+                covar = belief - covar;
             }
 
 
             void update(
-                state::StateVector<T>& state,
-                mtx::CovarianceMatrix<T>& covariance,
-                state::ControlVector<T>& control,
-                state::MeasurementVector<T>& measurement)
+                vct::State<T>& state,
+                mtx::Matrix<T>& covariance,
+                vct::State<T>& control,
+                vct::State<T>& measurement)
             {
-
 
 
                 //std::cout << "\n1\n" << std::endl;
@@ -475,13 +490,11 @@ namespace ukf {
 
 
         private:
-            calc::Calculator<T> compute_;
-
             model::ProcessModel<T>* process_model_;
             model::SensorModel<T>* sensor_model_;
 
-            state::StateVector<T> state_belief_;
-            state::StateVector<T> state_obser_;
+            vct::State<T> state_belief_;
+            vct::State<T> state_obser_;
 
             mtx::Matrix<T> covar_belief_;
             mtx::Matrix<T> covar_obser_;
@@ -494,8 +507,8 @@ namespace ukf {
             sigma::SigmaPoints<T> sigma_predict_;
             sigma::SigmaPoints<T> sigma_obser_;
 
-            state::WeightVector<T> mean_weight_;
-            state::WeightVector<T> covar_weight_;
+            vct::Weights<T> mean_weight_;
+            vct::Weights<T> covar_weight_;
 
             mtx::Matrix<T> noise_r_;
             mtx::Matrix<T> noise_q_;
@@ -512,7 +525,7 @@ namespace ukf {
             int measures_;
             int points_;
 
-            state::StateVector<T> place_holder_;
+            vct::State<T> place_holder_;
 
     };
 

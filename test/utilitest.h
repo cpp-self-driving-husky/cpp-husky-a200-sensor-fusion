@@ -10,9 +10,9 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "../src/state_vector.h"
-#include "../src/matrix.h"
-#include "../src/sigma_points.h"
+// #include "../src-eigen/state.h"
+// #include "../src-eigen/matrix.h"
+#include "../src/sigma.h"
 
 
 namespace {
@@ -158,6 +158,24 @@ struct test {
             for (int i = index; i < len && data[i] != '/'; ++i)
                 sum = sum*10 + data[i]-'0';
             return sum;
+        }
+
+
+        static std::vector<state::StateVector<double> >
+            measurements(std::string filepath)
+        {
+            std::vector<std::string> lines = readlines(filepath);
+            std::vector<state::StateVector<double> > meas;
+            for (int i = 0; i < lines.size(); ++i) {
+                int N = getDimension(lines[i],2);
+                state::StateVector<double> state(N);
+                std::vector<std::string> elems = split(lines[i],',');
+                elems.erase(elems.begin());
+                for (int j = 0; j < elems.size(); ++j)
+                    state[j] = stod(elems[j]);
+                meas.push_back(state);
+            }
+            return meas;
         }
 
 

@@ -21,9 +21,9 @@ void testUnscentedKalmanFilter() {
     int meas = 2;
 
     ukf::UnscentedKalmanFilter<double> ukf(vars,meas);
-    model::MotionModel<double>* motion = new model::SimpleMotionModel<double>();
-    sensor::SensorModel<double>* sensor = new sensor::SimpleSensorModel<double>();
-    ukf.setMotionModel(motion);
+    model::ProcessModel<double>* motion = new model::SimpleMotionModel<double>();
+    model::SensorModel<double>* sensor = new model::SimpleSensorModel<double>();
+    ukf.setProcessModel(motion);
     ukf.setSensorModel(sensor);
 
     mtx::Matrix<double> data = fillDataMatrix("../test/data/filter.txt");

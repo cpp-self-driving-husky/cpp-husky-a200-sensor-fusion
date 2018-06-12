@@ -1,7 +1,7 @@
 #ifndef MODELS_H_
 #define MODELS_H_
-#include "state.h"
 #include "sigma.h"
+#include "utilities.h"
 
 
 namespace model {
@@ -21,10 +21,10 @@ namespace model {
             }
 
             virtual double calculate(
-                state::StateVector<T>& x_tf,
-                state::StateVector<T>& x_ti,
-                state::ControlVector<T>& u_tf,
-                state::ControlVector<T>& u_ti) = 0;
+                vct::State<T>& x_tf,
+                vct::State<T>& x_ti,
+                vct::State<T>& u_tf,
+                vct::State<T>& u_ti) = 0;
 
             virtual double probability(
                 T a, T b) = 0;
@@ -78,7 +78,6 @@ namespace model {
             virtual void calculate(
                 sigma::SigmaPoints<T>& observation,
                 sigma::SigmaPoints<T>& prediction) = 0;
-
 
         private:
 

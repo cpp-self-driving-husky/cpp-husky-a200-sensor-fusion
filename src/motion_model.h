@@ -20,6 +20,9 @@ namespace {
 namespace model {
 
 
+
+    /*
+
     template<class T>
     class OdometryMotionModel : public ProcessModel<T> {
 
@@ -128,6 +131,8 @@ namespace model {
 
     };
 
+    */
+
     // a linear motion model created just for testing purposes
     // not to be used in actual implementation
     template<class T>
@@ -143,10 +148,10 @@ namespace model {
             }
 
             virtual double calculate(
-                state::StateVector<T>& x_tf,
-                state::StateVector<T>& x_ti,
-                state::ControlVector<T>& u_tf,
-                state::ControlVector<T>& u_ti)
+                vct::State<T>& x_tf,
+                vct::State<T>& x_ti,
+                vct::State<T>& u_tf,
+                vct::State<T>& u_ti)
             {
                 // motion model created just for testing purposes
                 // assumes state and control vector same dimension
@@ -193,45 +198,29 @@ namespace model {
             //      u2 == delta y
             //      u3 == delta t
             virtual double calculate(
-                state::StateVector<T>& x_tf,
-                state::StateVector<T>& x_ti,
-                state::ControlVector<T>& u_tf,
-                state::ControlVector<T>& u_ti)
+                vct::State<T>& x_tf,
+                vct::State<T>& x_ti,
+                vct::State<T>& u_tf,
+                vct::State<T>& u_ti)
             {
                 //T delta_x = u_tf[0] - u_ti[0];
                 //T delta_y = u_tf[1] - u_ti[1];
                 //T delta_t = u_tf[2] - u_ti[2];
 
-                T delta_x = u_tf[0];
-                T delta_y = u_tf[1];
-                T delta_t = u_tf[2];
+                T delta_x = u_tf(0);
+                T delta_y = u_tf(1);
+                T delta_t = u_tf(2);
 
                 T vx = delta_x / delta_t;
                 T vy = delta_y / delta_t;
 
-                x_tf[0] = x_ti[0] + delta_x;
-                x_tf[1] = x_ti[1] + delta_y;
-                x_tf[2] = x_ti[2];
-                x_tf[3] = x_ti[3];
+                x_tf(0) = x_ti(0) + delta_x;
+                x_tf(1) = x_ti(1) + delta_y;
+                x_tf(2) = x_ti(2);
+                x_tf(3) = x_ti(3);
 
                 return 1.0;
             }
-
-
-
-            /*
-
-            virtual double calculate(
-                state::StateVector<T>& x_tf,
-                state::StateVector<T>& x_ti,
-                state::ControlVector<T>& u_tf,
-                state::ControlVector<T>& u_ti)
-            {
-                x_tf = x_ti;
-                return 0.0;
-            }
-
-            */
 
             virtual double probability(T a, T b) {
                 return 1.0;

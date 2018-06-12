@@ -1,8 +1,7 @@
 #ifndef SIGMA_POINTS_H_
 #define SIGMA_POINTS_H_
 #include <cmath>
-#include "matrix.h"
-
+#include "utilities.h"
 
 // include for testing
 #include <iostream>
@@ -31,9 +30,10 @@ namespace sigma {
                 this->destroy();
                 this->points_ = points;
                 this->vars_ = vars;
-                this->sigma_ = new state::StateVector<T>[this->points_];
-                for (int i = 0; i < this->points_; ++i)
-                    this->sigma_[i].init(this->vars_);
+                this->sigma_ = new vct::State<T>[this->points_];
+                for (int i = 0; i < this->points_; ++i) {
+                    this->sigma_[i] = vct::State<T>(this->vars_);
+                }
             }
 
             void destroy() {
@@ -45,7 +45,7 @@ namespace sigma {
             }
 
             void generatePoints(
-                state::StateVector<T>& mean,
+                vct::State<T>& mean,
                 mtx::Matrix<T>& cholesky,
                 T gamma)
             {
@@ -54,6 +54,8 @@ namespace sigma {
                 this->generatePoints(mean,cholesky,gamma,i,this->vars_+1);
                 this->generatePoints(mean,cholesky,-gamma,i,this->points_);
             }
+
+            /*
 
             void generatePoints(
                 state::StateVector<T>& mean,
@@ -70,7 +72,25 @@ namespace sigma {
                 }
             }
 
-            state::StateVector<T>& operator[](int i) {
+            */
+
+            void generatePoints(
+                vct::State<T>& mean,
+                mtx::Matrix<T>& cholesky,
+                T coef, int& i, int bound)
+            {
+                int row = cholesky.rows(),
+                    col = cholesky.cols();
+                while (i < bound) {
+                    for (int j = 0; j < this->vars_; ++j) {
+                        //this->sigma_[i](j) = mean(j)+coef*cholesky[j*row+(i-1)%col];
+                        this->sigma_[i](j) = mean(j)+coef*cholesky(j,(i-1)%col);
+                    }
+                    ++i;
+                }
+            }
+
+            vct::State<T>& operator[](int i) {
                 return this->sigma_[i];
             }
 
@@ -81,6 +101,9 @@ namespace sigma {
             int getStateSize() {
                 return this->vars_;
             }
+
+
+            /*
 
             // for debugging purposes
             void print() {
@@ -105,9 +128,11 @@ namespace sigma {
                 std::cout << std::setprecision(def_prec);
             }
 
+            */
+
 
         private:
-            state::StateVector<T>* sigma_;
+            vct::State<T>* sigma_;
             int points_;
             int vars_;
 
