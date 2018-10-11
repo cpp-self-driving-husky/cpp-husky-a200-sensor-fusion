@@ -10,9 +10,11 @@
 #include <string>
 #include <vector>
 #include <map>
-// #include "../src-eigen/state.h"
-// #include "../src-eigen/matrix.h"
-#include "../src/sigma.h"
+// #include "../src/sigma.h"
+
+//#include "../src/utilities.h"
+
+//#include "../src/utilities.h"
 
 
 namespace {
@@ -39,7 +41,7 @@ namespace Color {
 
 }
 
-typedef std::vector<std::pair<mtx::Matrix<double>,mtx::Matrix<double> > > MatrixPairs;
+//typedef std::vector<std::pair<mtx::Matrix<double>,mtx::Matrix<double> > > MatrixPairs;
 
 
 
@@ -47,6 +49,9 @@ struct test {
 
 
     private:
+
+        /*
+
         template<typename T>
         static bool similar(T& a, T& b, double eps = EPSILON) {
             if (a >= b-eps && a <= b+eps)
@@ -92,6 +97,10 @@ struct test {
                 a << " ";
         }
 
+        */
+
+
+        /*
 
         template<typename T>
         static void console(mtx::Matrix<T>& res, mtx::Matrix<T>& ans) {
@@ -109,6 +118,8 @@ struct test {
             std::cout << std::endl;
         }
 
+        */
+
 
         static void successful() {
             std::cout << "\n" << Color::FG_GREEN <<
@@ -125,7 +136,7 @@ struct test {
 
 
     public:
-        static std::vector<std::string> split(const std::string& s, char delimiter) {
+        std::vector<std::string> split(const std::string& s, char delimiter) {
            std::vector<std::string> tokens;
            std::string token;
            std::istringstream tokenStream(s);
@@ -136,7 +147,7 @@ struct test {
 
 
     public:
-        static std::vector<std::string> readlines(std::string path) {
+        std::vector<std::string> readlines(std::string path) {
             std::ifstream file(path);
             std::string line;
             std::vector<std::string> lines;
@@ -152,7 +163,7 @@ struct test {
         // TODO ensure that reading first digit
         //      can occur regardless of size
         //      of previous digit
-        static int getDimension(std::string& data, int index) {
+        int getDimension(std::string& data, int index) {
             int len = data.size(),
                 sum = 0;
             for (int i = index; i < len && data[i] != '/'; ++i)
@@ -161,14 +172,14 @@ struct test {
         }
 
 
-        static std::vector<state::StateVector<double> >
+        std::vector<vct::State<double> >
             measurements(std::string filepath)
         {
             std::vector<std::string> lines = readlines(filepath);
-            std::vector<state::StateVector<double> > meas;
+            std::vector<vct::State<double> > meas;
             for (int i = 0; i < lines.size(); ++i) {
                 int N = getDimension(lines[i],2);
-                state::StateVector<double> state(N);
+                vct::State<double> state(N);
                 std::vector<std::string> elems = split(lines[i],',');
                 elems.erase(elems.begin());
                 for (int j = 0; j < elems.size(); ++j)
@@ -178,6 +189,8 @@ struct test {
             return meas;
         }
 
+
+        /*
 
         static mtx::Matrix<double> processMatrix(std::string& str) {
             int r = 2,c = 4;
@@ -202,8 +215,12 @@ struct test {
             return res;
         }
 
+        */
+
 
     public:
+
+        /*
         template<typename T>
         static void run(T& a, T& b) {
             if(comparable(a,b))
@@ -213,6 +230,7 @@ struct test {
             console(a,b);
         }
 
+
         template<typename T>
         static void run(mtx::Matrix<T>& res, mtx::Matrix<T>& ans) {
             if (comparable(res,ans))
@@ -221,6 +239,8 @@ struct test {
                 unsuccessful();
             console(res,ans);
         }
+
+        */
 
         static void trial(std::string msg) {
             std::cout << "\n\n" << Color::FG_BLUE << msg << Color::FG_DEFAULT << "\n\n";
