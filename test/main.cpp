@@ -1,223 +1,78 @@
-//#include "utilitest.h"
 //#include "../src/calculator.h"
 #include "../src/ukf.h"
-#include "../src/motion_model.h"
-#include "../src/sensor_model.h"
+#include "../src/process_model.h"
+#include "../src/measurement_model.h"
+#include <iostream>
+#include <iterator>
+#include <stdlib.h>
+#include <iomanip>
+#include <utility>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include <vector>
 #include <chrono>
-#include <iostream>
+#include <map>
 
 
-/*
-
-void testCalculatorA() {
-
-    int row = 3, col = 4;
-    int inner = col;
-    calc::Calculator<double> calc(row,col);
-
-    mtx::Matrix<double> A(row,inner);
-    mtx::Matrix<double> B(inner,col);
-    mtx::Matrix<double> P(row,row);
-
-    std::vector<double> a = {
-        6,5,7,3,
-        7,3,9,8,
-        2,5,1,4
-    };
-    std::vector<double> b = {
-        1,7,4,9,
-        6,5,1,6,
-        7,8,4,1,
-        1,2,7,4
-    };
-
-
-    for (int i = 0; i < A.getSize(); ++i)
-        A[i] = a[i];
-    for (int i = 0; i < B.getSize(); ++i)
-        B[i] = b[i];
-
-
-    calc.multiplyABAt(P,A,B);
-
-    A.precisionPrint();
-    B.precisionPrint();
-    P.precisionPrint();
-
-}
+// #include "utilitest.h"
 
 
 
-void testCalculatorB() {
+namespace test {
 
-    int row = 5, col = 3;
-    int inner = col;
-    calc::Calculator<double> calc(row,col);
-
-    mtx::Matrix<double> A(row,inner);
-    mtx::Matrix<double> B(inner,col);
-    mtx::Matrix<double> P(row,row);
-
-    std::vector<double> a = {
-        6,5,7,
-        3,7,3,
-        9,8,2,
-        5,1,4,
-        7,2,3
-    };
-    std::vector<double> b = {
-        1,7,4,
-        9,6,5,
-        1,6,7,
-        8,4,1,
-        1,2,7,4
-    };
+    static std::vector<std::string> split(const std::string& s, char delimiter) {
+       std::vector<std::string> tokens;
+       std::string token;
+       std::istringstream tokenStream(s);
+       while (std::getline(tokenStream, token, delimiter))
+          tokens.push_back(token);
+       return tokens;
+    }
 
 
-    for (int i = 0; i < A.getSize(); ++i)
-        A[i] = a[i];
-    for (int i = 0; i < B.getSize(); ++i)
-        B[i] = b[i];
+    static std::vector<std::string> readlines(std::string path) {
+        std::ifstream file(path);
+        std::string line;
+        std::vector<std::string> lines;
+        if (file.is_open()) {
+            while (std::getline(file,line))
+                lines.push_back(line);
+            file.close();
+        }
+        return lines;
+    }
 
 
-    calc.multiplyABAt(P,A,B);
+    // TODO ensure that reading first digit
+    //      can occur regardless of size
+    //      of previous digit
+    static int getDimension(std::string& data, int index) {
+        int len = data.size(),
+            sum = 0;
+        for (int i = index; i < len && data[i] != '/'; ++i)
+            sum = sum*10 + data[i]-'0';
+        return sum;
+    }
 
-    A.precisionPrint();
-    B.precisionPrint();
-    P.precisionPrint();
 
-}
-
-
-
-
-void testCovariance() {
-
-    auto matrices = test::processMatrices("data/covariance.txt");
-    test::trial("Covariance Matrices");
-    for (size_t i = 0; i < matrices.size(); ++i) {
-
-        int cols = matrices[i].first.getCols();
-        state::StateVector<double> mean(cols);
-        mtx::Matrix<double> cov(cols,cols);
-        calc::Calculator<double> calc(cols,cols);
-
-        calc.mean(mean,matrices[i].first);
-        calc.covariance(cov,matrices[i].first,mean);
-
-        test::run(cov,matrices[i].second);
-
+    static std::vector<vct::State<double> >
+        measurements(std::string filepath, int vars)
+    {
+        std::vector<std::string> lines = readlines(filepath);
+        std::vector<vct::State<double> > meas;
+        //std::cout << "\n\n" << std::endl;
+        for (int i = 0; i < lines.size(); ++i) {
+            vct::State<double> state(vars);
+            std::vector<std::string> elems = split(lines[i],',');
+            for (int j = 0; j < elems.size(); ++j)
+                state[j] = stod(elems[j]);
+            meas.push_back(state);
+        }
+        return meas;
     }
 
 }
-
-
-void testCholesky() {
-
-    auto matrices = test::processMatrices("data/cholesky.txt");
-    test::trial("Cholesky Matrices");
-    for (size_t i = 0; i < matrices.size(); ++i) {
-
-        int cols = matrices[i].first.getCols();
-        state::StateVector<double> mean(cols);
-        mtx::Matrix<double> cov(cols,cols);
-        mtx::Matrix<double> chol(cols,cols);
-        calc::Calculator<double> calc(cols,cols);
-
-        calc.mean(mean,matrices[i].first);
-        calc.covariance(cov,matrices[i].first,mean);
-        calc.cholesky(chol,cov);
-
-        test::run(chol,matrices[i].second);
-
-    }
-
-}
-
-
-void testInverse() {
-
-    auto matrices = test::processMatrices("data/inverse.txt");
-    test::trial("Inverse Matrix");
-    for (size_t i = 0; i < matrices.size(); ++i) {
-
-        int cols = matrices[i].first.getCols();
-        mtx::Matrix<double> inv(cols,cols);
-        calc::Calculator<double> calc(cols,cols);
-        calc.inverse(inv,matrices[i].first);
-
-        test::run(inv,matrices[i].second);
-    }
-
-}
-
-
-void testSigmaVariance() {
-
-    int vars = 3;
-    int meas = 2*vars+1;
-
-    std::vector<double> inputA = {
-        5,7,2,3,1,2,6,
-        3,2,6,5,2,3,7,
-        4,3,6,2,6,5,4
-    };
-    std::vector<double> inputB = {
-        3,2,5,4,3,5,1,
-        5,4,7,3,4,5,3,
-        1,3,5,2,4,6,6
-    };
-
-    mtx::Matrix<double> matA(vars,meas);
-    mtx::Matrix<double> matB(meas,vars);
-    mtx::Matrix<double> matP(vars,vars);
-    mtx::Matrix<double> matQ(vars,vars);
-    mtx::Matrix<double> q(vars,vars);
-
-    sigma::SigmaPoints<double> sigA(meas,vars);
-    sigma::SigmaPoints<double> sigB(meas,vars);
-
-    for (int i = 0; i < inputA.size(); ++i) {
-        int row = i / vars,
-            col = i % vars;
-
-        //matA[i] = inputA[i];
-        //matB[i] = inputB[i];
-
-        matA.elem(col,row) = inputA[i];
-        matB.elem(col,row) = inputB[i];
-
-        sigA[row][col] = inputA[i];
-        sigB[row][col] = inputB[i];
-    }
-
-    calc::Calculator<double> calc(vars,meas);
-    state::StateVector<double> state(vars);
-    state::WeightVector<double> weight(vars,meas);
-    for (int i = 0; i < weight.getNumPoints(); ++i) {
-        weight[i] = 1.0;
-    }
-    ukf::UnscentedKalmanFilter<double> ukf(vars,meas);
-
-
-    matA.print();
-    //matB.print();
-    sigA.print();
-    //sigB.print();
-
-
-    //ukf.sumWeightedCovariance(matP,sigA,state,weight,q);
-    ukf.sumWeightedCovariance(matP,sigA,state,sigA,state,weight);
-    calc.multiplyABt(matQ,matA,matA);
-
-    matP.print();
-    matQ.print();
-
-}
-
-*/
-
 
 
 void testKalmanTrivial() {
@@ -303,20 +158,64 @@ void testKalmanTrivial() {
 }
 
 
-/*
+
 
 void testKalmanMeasurements() {
 
-    std::vector<state::StateVector<double> > measurements =
-        test::measurements("data/measurements.txt");
+    int state_size = 4;
+    int ctrl_size = 1;
+    int msr_size = 2;
 
-    for (int i = 0; i < measurements.size(); ++i)
-        measurements[0].precisionPrint();
+    std::vector<vct::State<double> > measurements =
+        test::measurements("data/raw_odom_9-13_filtered.csv", 3);
 
+    ukf::UnscentedKalmanFilter<double> ukf(state_size,msr_size);
+
+    model::ProcessModel<double>* vel_motion =
+        new model::SimpleVelocityModel<double>();
+    model::SensorModel<double>* vel_sensor =
+        new model::SimpleSensorVelocityModel<double>();
+    ukf.setProcessModel(vel_motion);
+    ukf.setSensorModel(vel_sensor);
+
+    vct::State<double> state(state_size);
+    state[0] = measurements[0](0);
+    state[1] = measurements[0](1);
+    state[2] = 0.0;
+    state[3] = 0.0;
+
+    mtx::Matrix<double> covar(state_size,state_size);
+    for (int r = 0; r < covar.rows(); ++r) {
+        for (int c = 0; c < covar.cols(); ++c) {
+            if (r != c)
+                covar(r, c) = 0.2;
+            else
+                covar(r, c) = 1.0;
+        }
+    }
+
+    vct::Control<double> control(ctrl_size);
+    vct::Measurement<double> measure(msr_size);
+
+    std::cout << "\n" <<
+        "initial state" << "\n" << state << "\n\n" <<
+        "initial covariance" << "\n" << covar << "\n" << std::endl;
+
+    for (int i = 0; i < measurements.size(); ++i) {
+        measure(0) = measurements[i](0);
+        measure(1) = measurements[i](1);
+        control(0) = measurements[i](2);
+        ukf.update(state, covar, control, measure);
+    }
+
+    std::cout << "\n" <<
+        "final state" << "\n" << state << "\n\n" <<
+        "final covariance" << "\n" << covar << "\n" << std::endl;
 
 }
 
-*/
+
+
 
 
 int main(int argc, char* argv[]) {
@@ -328,11 +227,15 @@ int main(int argc, char* argv[]) {
     //testCalculatorA();
     //testCalculatorB();
 
-    testKalmanTrivial();
 
     //testSigmaVariance();
 
-    //testKalmanMeasurements();
+
+
+    //testKalmanTrivial();
+
+
+    testKalmanMeasurements();
 
     return 0;
 
