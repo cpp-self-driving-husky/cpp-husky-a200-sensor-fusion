@@ -150,8 +150,8 @@ namespace model {
             virtual double calculate(
                 sigma::SigmaPoints<T>& x_tf,
                 sigma::SigmaPoints<T>& x_ti,
-                vct::State<T>& u_tf,
-                vct::State<T>& u_ti)
+                vct::State<T>& u_tf/*,
+                vct::State<T>& u_ti*/)
             {
                 // motion model created just for testing purposes
                 // assumes state and control vector same dimension
@@ -162,11 +162,11 @@ namespace model {
                 return 1.0;
             }
 
-            virtual double probability(
-                T a, T b)
-            {
-                return 1.0;
-            }
+            //virtual double probability(
+            //    T a, T b)
+            //{
+            //    return 1.0;
+            //}
 
         private:
 
@@ -200,8 +200,8 @@ namespace model {
             virtual double calculate(
                 sigma::SigmaPoints<T>& x_tf,
                 sigma::SigmaPoints<T>& x_ti,
-                vct::State<T>& u_tf,
-                vct::State<T>& u_ti)
+                vct::State<T>& u_tf/*,
+                vct::State<T>& u_ti*/)
             {
                 //T delta_x = u_tf[0] - u_ti[0];
                 //T delta_y = u_tf[1] - u_ti[1];
@@ -234,9 +234,9 @@ namespace model {
                 return 1.0;
             }
 
-            virtual double probability(T a, T b) {
-                return 1.0;
-            }
+            //virtual double probability(T a, T b) {
+            //    return 1.0;
+            //}
 
 
         private:

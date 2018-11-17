@@ -1,6 +1,5 @@
 #ifndef MODELS_H_
 #define MODELS_H_
-// #include "sigma.h"
 #include "utilities.h"
 
 
@@ -23,11 +22,11 @@ namespace model {
             virtual double calculate(
                 sigma::SigmaPoints<T>& x_tf,
                 sigma::SigmaPoints<T>& x_ti,
-                vct::State<T>& u_tf,
-                vct::State<T>& u_ti) = 0;
+                vct::State<T>& u_tf/*,
+                vct::State<T>& u_ti*/) = 0;
 
-            virtual double probability(
-                T a, T b) = 0;
+            //virtual double probability(
+            //    T a, T b) = 0;
 
         protected:
             double distance(
